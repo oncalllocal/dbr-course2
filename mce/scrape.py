@@ -91,7 +91,7 @@ def run(queries, scrolls=6, keep_franchises=False):
         time.sleep(1)
     return sorted(leads, key=lambda x: -x["score"])
 
-FIELDS = ["score","name","phone","category","address","rating","reviews","website","hours","is_24_7","place_id","query"]
+FIELDS = ["score","name","phone","line_type","email","category","address","rating","reviews","website","hours","is_24_7","place_id","query"]
 def write_csv(leads, path):
     with open(path, "w", newline="") as f:
         w = csv.DictWriter(f, FIELDS, extrasaction="ignore"); w.writeheader(); w.writerows(leads)

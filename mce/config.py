@@ -30,3 +30,9 @@ FIELD_KEYS = {
     "call_day":     "contact.audit_call_day",
     "call_time":    "contact.audit_call_time",
 }
+
+TAG_CELL_MANUAL = "mce-cell-manual"   # mobile numbers: never auto-dialed, called by hand
+TAG_LINE = {"mobile": "mce-line-mobile", "landline": "mce-line-landline", "voip": "mce-line-voip",
+            "tollfree": "mce-line-tollfree", "unknown": "mce-line-unknown"}
+PIPELINE_NAME = "Missed Call Prospects"
+STAGE_MANUAL = "Manual Call - Cell"

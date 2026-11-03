@@ -30,10 +30,13 @@ def upsert_lead(l, extra_tags=()):
     vals = {"source_query": l["query"], "reviews": l["reviews"], "rating": l["rating"],
             "trade": l.get("trade") or l["category"]}
     tags = [TAG_PROSPECT, *extra_tags]
+    lt = l.get("line_type") or "unknown"
+    tags.append(TAG_LINE.get(lt, TAG_LINE["unknown"]))
+    if lt == "mobile": tags.append(TAG_CELL_MANUAL)
     if l["is_24_7"]: tags.append(TAG_24_7)
     body = {
         "locationId": ghl_location(), "name": l["name"], "companyName": l["name"],
-        "phone": l["phone"], "website": l["website"] or None, "address1": l["address"] or None,
+        "phone": l["phone"], "email": l.get("email") or None, "website": l["website"] or None, "address1": l["address"] or None,
         "source": "mce-maps-scrape", "tags": tags,
         "customFields": [{"id": ids[k], "field_value": str(v)} for k, v in vals.items()
                          if ids.get(k) and v not in (None, "")],
@@ -57,3 +60,26 @@ def list_contacts(tag=None, limit=100):
         if not nxt or not res.get("contacts"): break
         params.update(startAfterId=nxt, startAfter=res["meta"]["startAfter"])
     return [c for c in out if not tag or tag in [t.lower() for t in c.get("tags", [])]]
+
+
+def add_task(contact_id, title, body, due_iso):
+    return call("POST", f"/contacts/{contact_id}/tasks",
+                json={"title": title, "body": body, "dueDate": due_iso, "completed": False})
+
+_pipes = None
+def pipeline_stage(pipeline_name, stage_name):
+    """Return (pipeline_id, stage_id) or None. Pipelines must be created by hand in the GHL UI."""
+    global _pipes
+    if _pipes is None:
+        _pipes = call("GET", "/opportunities/pipelines", params={"locationId": ghl_location()})["pipelines"]
+    for p in _pipes:
+        if p["name"].lower() == pipeline_name.lower():
+            for st in p["stages"]:
+                if st["name"].lower() == stage_name.lower():
+                    return p["id"], st["id"]
+    return None
+
+def add_opportunity(contact_id, name, pipeline_id, stage_id):
+    return call("POST", "/opportunities/", json={"locationId": ghl_location(), "name": name,
+                "pipelineId": pipeline_id, "pipelineStageId": stage_id,
+                "contactId": contact_id, "status": "open"})
