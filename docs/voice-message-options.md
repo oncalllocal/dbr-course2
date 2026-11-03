@@ -1,5 +1,12 @@
 # Prerecorded message options (keep under ~15 seconds)
 
+## SELECTED (owner, with company name added)
+"Hi, this is OnCall Local calling to check after-hours phone availability for local service businesses. No action is needed on your part. Thank you, and have a good evening."
+
+**Still needed before launch:** a callback number, spoken at the end (e.g. "You can reach us at <number>."). A prerecorded call should identify the caller and give a way to reach them.
+
+## Other options considered
+
 The message must identify who is calling and give a callback number, and what it says must be true.
 Calling it a "test" while you are actually prospecting can read as deceptive, so say what it is.
 
