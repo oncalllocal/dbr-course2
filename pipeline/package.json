@@ -1,0 +1,1 @@
+{ "name": "mce-pipeline", "private": true, "scripts": { "test": "node --test test/pipeline.test.js", "stats": "node build.js --stats", "build": "node build.js --all" } }

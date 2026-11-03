@@ -1,0 +1,7 @@
+{
+  "_note": "Copy to accounts.json (git-ignored) and fill in your own sub-account ids, or set GHL_LOCATION_ID.",
+  "capture": "<location id of your capture sub-account>",
+  "capture_name": "<name>",
+  "workflows": "<location id where you build workflows>",
+  "workflows_name": "<name>"
+}
