@@ -16,7 +16,7 @@ Build this in the **prospecting sub-account** (the API cannot create workflows).
 ## Workflow A: "MCE – Dial Test"
 **Trigger:** Contact Tag Added = `mce-dial-queue`
 
-1. **Wait until the calling window.** Mon-Thu, 5:30 PM-8:30 PM in the contact's local time zone (use the Wait step's time-window option; if the step lacks it, use an If/Else on current time and loop back with a delay).
+1. **Wait until the calling window.** Mon-Thu, 5:30 PM-8:30 PM Eastern for Tampa (4:30-7:30 PM in the Central-time account unless the window uses the contact's time zone) (use the Wait step's time-window option; if the step lacks it, use an If/Else on current time and loop back with a delay).
 2. **Outbound call** with the prerecorded message (see `voice-message-options.md`). Use the same call action you already tested. Requirement: the action must expose a call-status result so you can branch on it.
 3. **If/Else on call status:**
    - **Answered** (a live person or answering service picked up): add tag `mce-answered`, set `audit_outcome = answered`, remove tag `mce-dial-queue`. End.
@@ -34,4 +34,4 @@ Build this in the **prospecting sub-account** (the API cannot create workflows).
 ## Compliance guardrails baked in
 - Calling window restricted in the workflow (step 1).
 - Honor "do not call" requests: add a Workflow B that removes the contact from all queues and adds tag `dnd-call` when a contact is marked DND.
-- The message must identify your business and give a callback number.
+- The message identifies the company by name; the owner chose not to voice a callback number.

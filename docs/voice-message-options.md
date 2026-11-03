@@ -3,7 +3,7 @@
 ## SELECTED (owner, with company name added)
 "Hi, this is OnCall Local calling to check after-hours phone availability for local service businesses. No action is needed on your part. Thank you, and have a good evening."
 
-**Still needed before launch:** a callback number, spoken at the end (e.g. "You can reach us at <number>."). A prerecorded call should identify the caller and give a way to reach them.
+**Owner decision (2026-11-03):** no callback number is voiced. The message identifies the company by name only.
 
 ## Other options considered
 
