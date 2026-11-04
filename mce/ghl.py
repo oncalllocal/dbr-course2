@@ -83,3 +83,14 @@ def add_opportunity(contact_id, name, pipeline_id, stage_id):
     return call("POST", "/opportunities/", json={"locationId": ghl_location(), "name": name,
                 "pipelineId": pipeline_id, "pipelineStageId": stage_id,
                 "contactId": contact_id, "status": "open"})
+
+
+def contacts_with_tag(tag, page_limit=100):
+    """Server-side tag search (reflects tag changes faster than the plain contact list)."""
+    out, page = [], 1
+    while True:
+        res = call("POST", "/contacts/search", json={"locationId": ghl_location(), "page": page, "pageLimit": page_limit,
+                   "filters": [{"field": "tags", "operator": "contains", "value": [tag]}]})
+        batch = res.get("contacts", []); out += batch
+        if len(batch) < page_limit: return out
+        page += 1

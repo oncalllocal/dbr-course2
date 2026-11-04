@@ -66,7 +66,7 @@ def load_queue(args):
         rows = [r for r in read_csv(args.from_csv) if r.get("line_type") in ("landline", "voip", "tollfree") or args.allow_unknown]
         return [{"id": None, "name": r["name"], "phone": r["phone"], "tags": []} for r in rows]
     out = []
-    for c in ghl.list_contacts(TAG_QUEUE):
+    for c in ghl.contacts_with_tag(TAG_QUEUE):
         tags = [t.lower() for t in c.get("tags", [])]
         if TAG_DNC in tags or c.get("dnd") or TAG_CELL_MANUAL in tags: continue
         out.append({"id": c["id"], "name": c.get("companyName") or c.get("contactName"), "phone": c.get("phone"), "tags": tags})
@@ -77,6 +77,8 @@ def record(c, result, call_day):
     if not cid: return
     ids = ghl.field_ids(); ghl.call("PUT", f"/contacts/{cid}", json={"customFields": [
         {"id": ids["outcome"], "field_value": result}, {"id": ids["call_day"], "field_value": call_day}] if ids.get("outcome") else []})
+    if result in ("voicemail", "ringout"):
+        ghl.add_tags(cid, ["mce-" + result])          # permanent marker of how the lead missed us
     if result == "answered":
         ghl.add_tags(cid, [TAG_ANSWERED]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE]})
     elif TAG_ATTEMPT in c["tags"]:      # second miss -> prospect
@@ -107,7 +109,7 @@ def run(args):
     for c in queue:
         if not in_window(datetime.datetime.now(tz), args.days, args.start, args.end) and not args.ignore_window:
             print("window closed; stopping"); break
-        try: res, call = place(c["phone"], env["TWILIO_FROM_NUMBER"], args.leave_voicemail)
+        try: res, call = place(c["phone"], env["TWILIO_FROM_NUMBER"], False)
         except Exception as e: print("  error:", str(e)[:150]); continue
         stats[res] += 1; print(f"  {c['name']} {c['phone']} -> {res}")
         if res != "answered": misses.append(c["name"])
