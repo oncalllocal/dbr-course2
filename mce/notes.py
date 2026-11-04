@@ -47,12 +47,12 @@ def prospect_task(c, fields, history, tz):
     name = c.get("companyName") or c.get("contactName")
     return (f"CALL THIS PROSPECT. They did not answer our after-hours call on two evenings.\n\n{business_block(c, fields)}\n\n"
             f"Call history:\n" + "\n".join(f"- {h}" for h in history) + f"\n\nWhy we called: {WHY}\n\n"
-            f"Suggested opener: \"Hi, this is [your name] with OnCall Local. We called {name} "
+            f"Suggested opener: \"Hi, this is Sam with OnCall Local. We called {name} "
             f"after hours twice this week to see how your phones are covered, and nobody picked up. "
             f"When a customer calls with an emergency after hours, what happens to that call?\"\n\n"
             f"Offer: {PITCH}\n\nAfter the call: set the opportunity stage in Missed Call Prospects and add a note with what they said.")
 
 def manual_task(c, fields):
     return (f"MANUAL CALL: this number is a mobile phone, so it is never auto-dialed.\n\n{business_block(c, fields)}\n\n"
-            f"Why on your list: {WHY}\n\nSuggested opener: \"Hi, this is [your name] with OnCall Local. Quick question: when a customer "
+            f"Why on your list: {WHY}\n\nSuggested opener: \"Hi, this is Sam with OnCall Local. Quick question: when a customer "
             f"calls {c.get('companyName') or 'your company'} after hours and you can't pick up, what happens to that call?\"\n\nOffer: {PITCH}")
