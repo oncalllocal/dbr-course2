@@ -2,7 +2,7 @@
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { spoken } = require('./pronounce');
 const MODEL = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
-const VOICE = () => process.env.ELEVENLABS_VOICE_ID || 'l4Coq6695JDX9xtLqXDE';
+const VOICE = () => process.env.ELEVENLABS_VOICE_ID || 'lxYfHSkYm1EzQzGhdbfc';
 // The key may be an env var OR injected by the sandbox's network-secret proxy (header xi-api-key), in which case
 // no env var exists. So voice is "enabled" unless silenced; build.js falls back to silent if the first call is rejected.
 const enabled = () => !process.env.MCE_SILENT;

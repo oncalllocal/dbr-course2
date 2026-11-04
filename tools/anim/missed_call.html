@@ -1,0 +1,124 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Missed call before/after</title>
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#f3f7fb;font-family:Inter,"Segoe UI",Arial,sans-serif;color:#13293d}
+.topbar{position:absolute;left:0;top:0;width:100%;height:10px;background:linear-gradient(90deg,#00437A 70%,#F47920 70%)}
+#chip{position:absolute;left:120px;top:150px;padding:10px 28px;border-radius:40px;font-weight:800;font-size:34px;letter-spacing:.12em;color:#fff}
+#cap{position:absolute;left:120px;top:290px;width:900px}
+#cap1{font-size:84px;font-weight:800;line-height:1.08;letter-spacing:-.01em}
+#cap2{margin-top:26px;font-size:40px;line-height:1.3;color:#45617a}
+#ill{position:absolute;left:120px;bottom:60px;font-size:24px;color:#7b93a8}
+#logo{position:absolute;right:60px;bottom:36px;height:84px;background:#fff;border-radius:20px;padding:6px 18px;box-shadow:0 4px 18px rgba(0,67,122,.15)}
+#phone{position:absolute;left:1120px;top:60px;width:470px;height:960px;border-radius:70px;background:#0d1b2a;box-shadow:0 30px 80px rgba(0,67,122,.35)}
+#screen{position:absolute;left:14px;top:14px;width:442px;height:932px;border-radius:58px;overflow:hidden;background:#fff}
+.layer{position:absolute;inset:0;opacity:0}
+.status{height:54px;padding:18px 34px 0;display:flex;justify-content:space-between;font-weight:700;font-size:20px}
+/* results */
+#results{background:#f6f8fb}
+.search{margin:6px 20px 14px;height:56px;border-radius:30px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;align-items:center;padding:0 22px;font-size:22px;color:#33475b}
+.map{margin:0 0 6px;height:210px;background:#dfe9f0;position:relative;overflow:hidden}
+.map i{position:absolute;background:#fff}
+.pin{position:absolute;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#e5483b}
+.card{margin:12px 16px;padding:18px 20px;border-radius:22px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.card h3{font-size:26px;font-weight:800}.card p{font-size:19px;color:#5a6f82;margin-top:6px}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;text-align:center;padding:13px 0;border-radius:30px;font-size:21px;font-weight:700;background:#e8f1fb;color:#00437A}
+.btn.call{background:#00437A;color:#fff}
+/* call screens */
+.callscr{background:linear-gradient(180deg,#1b2b3c,#0d1b2a);color:#fff;text-align:center}
+.av{width:150px;height:150px;border-radius:50%;margin:150px auto 28px;background:#2d4a66;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:800}
+.cn{font-size:36px;font-weight:800;padding:0 20px}.cs{margin-top:18px;font-size:28px;color:#b9c8d6;min-height:40px}
+.end{position:absolute;left:50%;bottom:90px;width:92px;height:92px;margin-left:-46px;border-radius:50%;background:#e5483b;display:flex;align-items:center;justify-content:center;font-size:40px}
+/* messages */
+#msgs{background:#f6f8fb}
+.mh{height:120px;background:#fff;border-bottom:1px solid #e1e8ef;padding-top:54px;text-align:center;font-size:26px;font-weight:800;color:#00437A}
+.th{padding:20px 16px;display:flex;flex-direction:column;gap:14px}
+.b{max-width:80%;padding:15px 20px;border-radius:26px;font-size:22px;line-height:1.35;opacity:0}
+.b.in{align-self:flex-start;background:#e6ecf2}.b.out{align-self:flex-end;background:#F47920;color:#fff}
+.inp{position:absolute;left:14px;right:14px;bottom:26px;height:62px;border-radius:32px;background:#fff;border:1px solid #d5dee7;padding:0 24px;display:flex;align-items:center;font-size:22px}
+#banner{position:absolute;left:12px;right:12px;top:14px;border-radius:26px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.28);padding:16px 18px;opacity:0;z-index:5}
+#banner b{font-size:20px}#banner small{float:right;color:#7b93a8;font-size:16px}#banner div{font-size:21px;margin-top:6px;line-height:1.3}
+#tap{position:absolute;width:70px;height:70px;border-radius:50%;border:5px solid #F47920;background:rgba(244,121,32,.25);opacity:0;z-index:9;transform:translate(-50%,-50%)}
+</style></head><body>
+<div class="topbar"></div>
+<div id="chip"></div>
+<div id="cap"><div id="cap1"></div><div id="cap2"></div></div>
+<div id="ill">Illustration. Not a real customer or call.</div>
+<img id="logo" src="../../brand/logo.png">
+<div id="phone"><div id="screen">
+ <div id="results" class="layer">
+  <div class="status"><span id="clock">9:02 PM</span><span>5G ▮▮▮</span></div>
+  <div class="search">🔍&nbsp; <span id="q">plumber near me</span></div>
+  <div class="map"><i style="left:-10px;top:70px;width:520px;height:16px;transform:rotate(-8deg)"></i><i style="left:120px;top:-10px;width:16px;height:300px;transform:rotate(12deg)"></i><i style="left:260px;top:20px;width:12px;height:300px;transform:rotate(-5deg)"></i><i style="left:-10px;top:150px;width:520px;height:12px;transform:rotate(4deg)"></i>
+   <div class="pin" style="left:140px;top:84px"></div><div class="pin" style="left:300px;top:128px;background:#7b93a8"></div></div>
+  <div class="card"><h3 id="n1">Your Company</h3><p>★ 4.9 (212) · Plumber · Open 24 hours</p><div class="btns"><div class="btn call" id="btnCall1">Call</div><div class="btn">Website</div><div class="btn">Directions</div></div></div>
+  <div class="card"><h3 id="n2">Next Plumbing Co</h3><p>★ 4.7 (180) · Plumber · Open now</p><div class="btns"><div class="btn call" id="btnCall2">Call</div><div class="btn">Website</div><div class="btn">Directions</div></div></div>
+  <div id="banner"><small>now</small><b id="bn">Your Company</b><div id="bt">Sorry we missed your call! How can we help you?</div></div>
+ </div>
+ <div id="call1" class="layer callscr"><div class="status" style="color:#fff"><span>9:02 PM</span><span></span></div><div class="av" id="av1">Y</div><div class="cn" id="cn1">Your Company</div><div class="cs" id="cs1"></div><div class="end">✆</div></div>
+ <div id="call2" class="layer callscr"><div class="status" style="color:#fff"><span>9:03 PM</span><span></span></div><div class="av" id="av2">N</div><div class="cn" id="cn2">Next Plumbing Co</div><div class="cs" id="cs2"></div><div class="end">✆</div></div>
+ <div id="msgs" class="layer"><div class="mh" id="mh">Your Company</div><div class="th"><div class="b in" id="b1"></div><div class="b out" id="b2"></div><div class="b in" id="b3"></div></div><div class="inp" id="inp"></div></div>
+</div></div><div id="tap"></div>
+<script>
+const P=new URLSearchParams(location.search);
+const MODE=P.get('mode')||'before', BIZ=P.get('biz')||'Your Company', COMP=P.get('comp')||'Next Plumbing Co';
+const JOB=P.get('job')||'a $12,000 repipe', CUST=P.get('cust')||'Water heater just burst!';
+const REPLY=P.get('reply')||'That sounds stressful. Is the water still running? What is the address?';
+const END=MODE==='before'?17:16.5;
+const $=id=>document.getElementById(id);
+$('n1').textContent=BIZ;$('cn1').textContent=BIZ;$('av1').textContent=BIZ[0];$('bn').textContent=BIZ;$('mh').textContent=BIZ;
+$('n2').textContent=COMP;$('cn2').textContent=COMP;$('av2').textContent=COMP[0];
+$('b1').textContent=`Hi! Sorry we missed your call. This is the virtual assistant for ${BIZ}. How can we help you?`;
+$('b2').textContent=CUST;$('b3').textContent=REPLY;
+const ramp=(t,a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)));
+const centre=el=>{const r=el.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+const CAPS=MODE==='before'?[
+ [0,2,'A homeowner searches for a plumber.','It is 9 PM and something is leaking.'],
+ [2,6.2,'They tap call on your business.','It rings. And rings.'],
+ [6.2,8,'No answer.','No voicemail. No second chance.'],
+ [8,10.4,'So they tap the next company.',''],
+ [10.4,13.4,'That company answers.',''],
+ [13.4,99,'Job gone.',`${JOB[0].toUpperCase()+JOB.slice(1)}, won by whoever picked up.`]]:[
+ [0,2,'The same homeowner. The same search.','Now your business has missed call text back.'],
+ [2,6.2,'They tap call on your business.','It rings. Nobody answers.'],
+ [6.2,7.8,'No answer.',''],
+ [7.8,9.4,'But before they tap the next company...',''],
+ [9.4,12.2,'A text arrives from your business.','Instantly.'],
+ [12.2,14.2,'The assistant gets the details.',''],
+ [14.2,99,'The conversation has started.','You call back first.']];
+function layer(id,o){$(id).style.opacity=o}
+function render(t){
+ // chip
+ const c=$('chip');c.textContent=MODE==='before'?'BEFORE':'AFTER';c.style.background=MODE==='before'?'#7b93a8':'#1f9d55';
+ // captions
+ const cur=CAPS.find(x=>t>=x[0]&&t<x[1])||CAPS[CAPS.length-1];
+ $('cap1').textContent=cur[2];$('cap2').textContent=cur[3];
+ const f=ramp(t,cur[0],cur[0]+.35);$('cap').style.opacity=f;$('cap').style.transform=`translateY(${(1-f)*14}px)`;
+ $('cap1').style.color=(cur[2]==='No answer.'||cur[2]==='Job gone.')?'#c0392b':(cur[2]==='The conversation has started.'?'#1f9d55':'#13293d');
+ // screens
+ const inRes=(t<2.2)||(t>=7.2&&t<(MODE==='before'?9.2:9.5));
+ const inCall1=t>=2.2&&t<7.2;
+ const inCall2=MODE==='before'&&t>=9.2;
+ const inMsgs=MODE==='after'&&t>=9.5;
+ layer('results',inRes?1:0);layer('call1',inCall1?1:0);layer('call2',inCall2?1:0);layer('msgs',inMsgs?1:0);
+ // call 1 status
+ const dots='.'.repeat(Math.floor(t*2.5)%4);
+ $('cs1').textContent=t<3?'Calling'+dots:(t<6.2?'Ringing'+dots:'No answer');
+ $('cs1').style.color=t>=6.2?'#ff6b5e':'#b9c8d6';
+ // call 2
+ const k=t-10.2;$('cs2').textContent=t<10.2?'Calling'+dots:`Connected  0:0${Math.min(9,Math.max(0,Math.floor(k)))}`;
+ $('cs2').style.color=t>=10.2?'#5fe39b':'#b9c8d6';
+ // banner
+ if(MODE==='after'){const b=ramp(t,7.8,8.2);$('banner').style.opacity=t<9.5?b:0;$('banner').style.transform=`translateY(${(1-b)*-70}px)`}else $('banner').style.opacity=0;
+ // messages
+ const show=(id,a)=>{const v=ramp(t,a,a+.35);$(id).style.opacity=v;$(id).style.transform=`translateY(${(1-v)*16}px)`};
+ show('b1',9.6);show('b2',12.4);show('b3',13.2);
+ let typed='';if(t>=10.6&&t<12.4)typed=CUST.slice(0,Math.floor((t-10.6)*13));
+ $('inp').textContent=typed?typed+(Math.floor(t*3)%2?'|':''):'';
+ // tap ripple
+ const taps=MODE==='before'?[[2.0,'btnCall1'],[9.0,'btnCall2']]:[[2.0,'btnCall1'],[9.3,'banner']];
+ let o=0,pos=[0,0];for(const [ts,id] of taps){if(t>=ts&&t<ts+.5){o=1-ramp(t,ts+.15,ts+.5);const el=$(id);const wasVis=$('results').style.opacity;pos=centre(el);const s=.6+ramp(t,ts,ts+.5)*.9;$('tap').style.transform=`translate(-50%,-50%) scale(${s})`}}
+ $('tap').style.opacity=o;$('tap').style.left=pos[0]+'px';$('tap').style.top=pos[1]+'px';
+}
+window.END=END;window.renderAt=render;render(0);
+</script></body></html>

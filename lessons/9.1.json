@@ -49,6 +49,18 @@
    "narration": "You can't be everywhere. You're under a sink, on a roof, or with another customer. Or you're finally having dinner. Even companies with a team answering the phones around the clock still miss calls. No one can pick up every call."
   },
   {
+   "type": "clip",
+   "clip": "clips/missed_call_before.mp4",
+   "note": "Illustration only. Not a real customer or call.",
+   "narration": "Here's what happens today. A homeowner searches for a plumber and finds you. They tap call. It rings. Nobody answers. So they go back, tap the next company on the list, and that company picks up. That's the job, gone."
+  },
+  {
+   "type": "clip",
+   "clip": "clips/missed_call_after.mp4",
+   "note": "Illustration only. Not a real customer or call.",
+   "narration": "Now the same call, with missed call text back. They tap call. Nobody answers. But before they can tap the next company, a text arrives from your business, asking how it can help. The conversation has started, and you call back first."
+  },
+  {
    "type": "stat",
    "big": "$83K+",
    "label": "in *sold jobs* this year for *Discount Plumbing*",
@@ -66,26 +78,6 @@
    ],
    "note": "The text assistant is an AI and introduces itself as your business's virtual assistant.",
    "narration": "Here's how it works. A call comes in and goes unanswered. Within seconds, the caller gets a text from your business. An assistant finds out who they are and what they need. Then you get the whole conversation on your phone, so you can call them back first."
-  },
-  {
-   "type": "shot",
-   "image": "shots/9.1-example-chat.png",
-   "title": "What the caller sees",
-   "capture": "Example text conversation between a missed caller and the virtual assistant (generated example, not a real customer)",
-   "pointer": [
-    {
-     "x": 0.5,
-     "y": 0.33,
-     "label": "Instant text"
-    },
-    {
-     "x": 0.5,
-     "y": 0.62,
-     "label": "Address and details"
-    }
-   ],
-   "note": "Example conversation for illustration only.",
-   "narration": "Here's an example. The caller gets an instant text. The assistant asks what's wrong, and where. By the time you're free, you already have the problem, the address, and the caller's details, ready for your call back."
   },
   {
    "type": "quote",

@@ -22,6 +22,7 @@ function slideHtml(lesson, s, imgPath) {
   else if (s.type === 'bullets') body = `<div class="wrap"><h2>${hl(s.title)}</h2><ul>${s.items.map(i => `<li>${hl(i)}</li>`).join('')}</ul></div>`;
   else if (s.type === 'stat') body = `<div class="wrap"><div class="stat">${esc(s.big)}</div><div class="statlbl">${hl(s.label)}</div></div>`;
   else if (s.type === 'cols') body = `<div class="wrap"><h2>${hl(s.title)}</h2><div class="cols">${s.cards.map((c, i) => `<div class="card ${i % 2 ? 'o' : ''}"><h3>${esc(c.h)}</h3><p>${esc(c.p)}</p></div>`).join('')}</div></div>`;
+  else if (s.type === 'clip') body = '';
   else if (s.type === 'quote') body = `<div class="wrap"><div class="quote">${hl(s.text)}</div></div>`;
   else if (s.type === 'shot') {
     const inner = imgPath ? `<img id="shot" src="data:${mime(imgPath)};base64,${fs.readFileSync(imgPath).toString('base64')}">`

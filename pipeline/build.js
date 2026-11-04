@@ -70,7 +70,8 @@ async function render(item, browser) {
       if (r) { chars += r.chars; voiced++; run(`ffmpeg -y -loglevel error -i "${r.file}" -ar 44100 -ac 2 -af "silenceremove=start_periods=1:start_threshold=-50dB" "${wav}"`); }
     }
     if (!fs.existsSync(wav)) { const d = Math.max(3, s.narration.trim().split(/\s+/).length / 2.5); run(`ffmpeg -y -loglevel error -f lavfi -i anullsrc=r=44100:cl=stereo -t ${d.toFixed(2)} "${wav}"`); }
-    const d = dur(wav) + 0.6, seg = `${work}/seg${n}.mp4`;
+    const clipFile = s.type === 'clip' ? resolve(s.clip) : null;
+    const d = Math.max(dur(wav) + 0.6, clipFile && fs.existsSync(clipFile) ? dur(clipFile) : 0), seg = `${work}/seg${n}.mp4`;
     let filter = '[0:v]null[vout]', extra = '';
     if (s.type === 'shot' && s.pointer) {
       const rect = await shotRect(page), ps = [].concat(s.pointer);
@@ -83,6 +84,10 @@ async function render(item, browser) {
       fs.writeFileSync(`${work}/f${n}.txt`, built.script);
       filter = `-filter_complex_script ${work}/f${n}.txt -map "[vout]" -map 1:a`;
       extra = files.map(f => `-loop 1 -t ${d.toFixed(2)} -i "${f}"`).join(' ');
+    }
+    if (clipFile && fs.existsSync(clipFile)) {
+      run(`ffmpeg -y -loglevel error -i "${clipFile}" -i "${wav}" -filter_complex "[0:v]scale=1920:1080,tpad=stop_mode=clone:stop_duration=${d.toFixed(2)},fps=30,format=yuv420p[vout]" -map "[vout]" -map 1:a -af apad=pad_dur=${d.toFixed(2)} -t ${d.toFixed(2)} -c:v libx264 -preset medium -crf 20 -r 30 -c:a aac -b:a 160k "${seg}"`);
+      segs.push(`file 'seg${n}.mp4'`); srt += `${i + 1}\n${stamp(t)} --> ${stamp(t + d - 0.5)}\n${captionText(s.caption || s.narration)}\n\n`; t += d; continue;
     }
     const maps = filter.startsWith('-filter') ? filter : `-filter_complex "${filter}" -map "[vout]" -map 1:a`;
     run(`ffmpeg -y -loglevel error -loop 1 -t ${d.toFixed(2)} -i ${work}/s${n}.png -i "${wav}" ${extra} ${maps} -af apad=pad_dur=0.6 -t ${d.toFixed(2)} -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -r 30 -c:a aac -b:a 160k "${seg}"`);
