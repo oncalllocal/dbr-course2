@@ -114,7 +114,7 @@ def main():
     s.add_argument("--live", action="store_true"); s.add_argument("--limit", type=int, default=25)
     s.add_argument("--from-csv", help="dry-run/test against a CSV instead of the GHL queue"); s.add_argument("--allow-unknown", action="store_true")
     s.add_argument("--tz", default="America/New_York"); s.add_argument("--days", default="mon-thu")
-    s.add_argument("--start", default="17:30"); s.add_argument("--end", default="20:30")
+    s.add_argument("--start", default="19:00"); s.add_argument("--end", default="19:30")
     s.add_argument("--pace", type=int, default=8, help="seconds between calls"); s.add_argument("--sms", action="store_true", help="text a summary to OWNER_PHONE")
     s.add_argument("--ignore-window", action="store_true")
     s = sub.add_parser("results"); s.set_defaults(f=cmd_results); s.add_argument("--out", default="data/results.csv")
