@@ -75,14 +75,81 @@ def slides(n, biz):
       narration="If this sounds like something you'd want working for you, just reply to the email and say you're in. We'll take it from there. Thanks for watching."))
     return S
 
+QUERY_NICHE = {"plumber": "plumber", "hvac contractor": "hvac", "electrician": "electrician", "roofing contractor": "roofing",
+               "water damage restoration": "water_damage", "garage door repair": "garage_door"}
+
+def from_lead(phone, csv_path):
+    """Real lead data from the scrape CSV, plus the real call day/time from GHL when it exists."""
+    sys.path.insert(0, ROOT)
+    from mce import scrape
+    row = next((r for r in scrape.read_csv(csv_path) if r["phone"] == phone), None)
+    if not row: sys.exit(f"{phone} not found in {csv_path}")
+    niche = QUERY_NICHE.get(row["query"].split(" in ")[0].strip().lower())
+    if not niche: sys.exit(f"no video template for trade '{row['query']}'")
+    info = dict(niche=niche, biz=row["name"], rating=row["rating"], reviews=row["reviews"], hours=row["hours"] or ("Open 24 hours" if row["is_24_7"] else ""),
+                email=row.get("email", ""), website=row.get("website", ""), call_day=None, call_time=None)
+    try:
+        from mce import ghl
+        c = ghl.find_by_phone(phone)
+        if c:
+            f = ghl.field_values(ghl.call("GET", f"/contacts/{c[0]['id']}")["contact"]); info["call_day"], info["call_time"] = f.get("call_day"), f.get("call_time")
+    except Exception as e: print("note: could not read the call time from GHL:", str(e)[:100])
+    return info
+
+def merged_emails(info, niche):
+    """Email 1 and Email 2 with this lead's real data merged in. Preview only; nothing is sent."""
+    sys.path.insert(0, ROOT)
+    from mce.config import BIG_JOB
+    key = next(q for q, k in QUERY_NICHE.items() if k == niche)
+    job = BIG_JOB[key]; day, tm = info["call_day"] or "[DAY]", info["call_time"] or "[TIME]"
+    e1 = f"""Subject: No one picked up at {tm}
+
+Hi there,
+
+We called {info['biz']} {day} night at {tm} as part of an after-hours phone audit we're running for local service companies. Nobody picked up.
+
+I'm not writing to scold you. I'm writing because of what that call could have been.
+
+If that had been a real customer, ready to book {job}, they wouldn't have waited for a callback. They would have hung up and called the next company on Google. And you would never have known the call happened.
+
+That's the part that stings: it isn't the one call, it's that the biggest jobs often come in at the worst times, from people who need an answer right now.
+
+There's a simple fix, and it costs far less than a single job. The moment a call goes unanswered, the caller gets a text from your business. An assistant finds out who they are and what they need, and the whole conversation lands on your phone so you can call them back first.
+
+Would you mind if I sent you a short video (under 5 minutes) showing exactly how it works? Just reply "yes" and I'll send it over.
+
+Sam
+OnCall Local
+"""
+    e2 = """Subject: Your video: what a missed call really costs
+
+Thanks for saying yes. Here's the video (under 5 minutes):
+
+[VIDEO LINK]
+
+It covers what an unanswered after-hours call can cost, how the text-back works, and founder pricing: $497 for the first month, then $247 a month, no contract.
+
+If it makes sense, just reply to this email and I'll get you set up. If you have questions, reply with those instead.
+
+Sam
+OnCall Local
+"""
+    return e1 + "\n---\n\n" + e2
+
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--niche", required=True, choices=sorted(NICHES)); ap.add_argument("--biz", required=True)
-    ap.add_argument("--slug", required=True); ap.add_argument("--skip-render", action="store_true"); ap.add_argument("--md")
-    a = ap.parse_args(); n = NICHES[a.niche]
+    ap = argparse.ArgumentParser(); ap.add_argument("--niche", choices=sorted(NICHES)); ap.add_argument("--biz"); ap.add_argument("--slug")
+    ap.add_argument("--phone", help="build from a real lead: its E.164 phone in the CSV"); ap.add_argument("--csv", default="data/tampa_batch1.csv")
+    ap.add_argument("--rating"); ap.add_argument("--reviews"); ap.add_argument("--hours"); ap.add_argument("--skip-render", action="store_true"); ap.add_argument("--md")
+    a = ap.parse_args(); info = None
+    if a.phone:
+        info = from_lead(a.phone, a.csv); a.niche = a.niche or info["niche"]; a.biz = a.biz or info["biz"]; a.rating = a.rating or info["rating"]; a.reviews = a.reviews or info["reviews"]; a.hours = a.hours if a.hours is not None else info["hours"]
+        a.slug = a.slug or "".join(ch if ch.isalnum() else "_" for ch in a.biz.lower()).strip("_")
+    if not (a.niche and a.biz and a.slug): ap.error("give --phone, or all of --niche --biz --slug")
+    n = NICHES[a.niche]
     os.makedirs(f"{ROOT}/lessons/gen", exist_ok=True); os.makedirs(f"{ROOT}/lessons/clips/gen", exist_ok=True)
     before, after = f"clips/gen/{a.slug}_before.mp4", f"clips/gen/{a.slug}_after.mp4"
     if not a.skip_render:
-        procs = [subprocess.Popen(["node", f"{ROOT}/tools/render_anim.js", mode, f"{ROOT}/lessons/{path}", "--niche", a.niche.replace("water_damage", "water_damage"), "--biz", a.biz])
+        procs = [subprocess.Popen(["node", f"{ROOT}/tools/render_anim.js", mode, f"{ROOT}/lessons/{path}", "--niche", a.niche, "--biz", a.biz] + [x for k, v in (("--rating", a.rating), ("--reviews", a.reviews), ("--hours", a.hours)) for x in ((k, str(v)) if v not in (None, "", 0) else ())])
                  for mode, path in (("before", before), ("after", after))]
         if any(p.wait() for p in procs): sys.exit("animation render failed")
     S = slides(n, a.biz)
@@ -94,6 +161,8 @@ def main():
     words = sum(len(s["narration"].split()) for s in S); print(f"{a.slug}: {len(S)} slides, {words} words")
     if a.md:
         open(a.md, "w").write(f"# Script: {a.niche} / {a.biz}\n\n" + "\n\n".join(f"**{i+1}.** {s['narration']}" for i, s in enumerate(S)) + "\n")
+    if info:
+        e = f"{ROOT}/lessons/gen/{a.slug}_emails.md"; open(e, "w").write(f"# Preview only. Not sent.\n\nTo: {info['email'] or '(no email found)'}\nCall: {info['call_day']} {info['call_time']}\n\n" + merged_emails(info, a.niche)); print("email preview:", e)
     if not os.environ.get("VSL_NO_BUILD"):
         subprocess.check_call(["node", f"{ROOT}/pipeline/build.js", path])
 

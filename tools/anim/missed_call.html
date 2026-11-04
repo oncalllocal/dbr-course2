@@ -81,7 +81,7 @@ const END=18.5;
 const $=id=>document.getElementById(id);
 $('n1').textContent=BIZ;$('cn1').textContent=BIZ;$('av1').textContent=BIZ[0];$('bn').textContent=BIZ;$('mh').textContent=BIZ;
 $('n2').textContent=COMP;$('cn2').textContent=COMP;$('av2').textContent=COMP[0];
-$('p1').textContent='★ 4.9 (212) · '+CAT+' · Open 24 hours';$('p2').textContent='★ 4.7 (180) · '+CAT+' · Open now';
+const RT=P.get('rating'),RV=P.get('reviews'),HR=P.get('hours');$('p1').textContent=[(RT&&RV)?`★ ${RT} (${RV})`:null,HR||CAT].filter(Boolean).join(' · ');$('p2').textContent='★ 4.7 (180) · '+CAT+' · Open now';
 $('b1').textContent=`Hi! Sorry we missed your call. This is the virtual assistant for ${BIZ}. How can we help you?`;
 $('b2').textContent=CUST;$('b3').textContent=REPLY;
 const ramp=(t,a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)));
