@@ -7,15 +7,15 @@ Not legal advice. Have an attorney review before sending. This lists what the dr
 |---|---|
 | Big-ticket jobs | "Examples of large jobs by trade. Actual job values and outcomes vary." |
 | 38% statistic | Source and sample size line (N, dates). **Must be filled with real numbers before use.** |
-| Discount Plumbing result | Named client, location, "$83,000+ in sold jobs this year, per the client's records", "One client's result. Results vary and are not guaranteed; they depend on call volume, response speed, pricing and follow-up." |
+| Client result | Unnamed client in Northern California, "$83,000+ in sold jobs this year, per the client's records", "One client's result. Results vary and are not guaranteed; they depend on call volume, response speed, pricing and follow-up." |
 | How it works | "The text assistant is an AI and introduces itself as your business's virtual assistant." |
 | Pricing | Founder price, usage billed separately, "Pricing may change for future customers." |
 | Payback math | "Illustration only", the arithmetic shown, "Results are not guaranteed." |
 | Example chat | "Example conversation for illustration only" and a generic business name |
 
 ## Open items for the owner
-1. **Substantiation file.** Keep records behind every objective claim: the 38% (calls, dates, method), the $83K+ (invoices or job records), the client's written permission to use their name and the figure, and the date of that permission.
-2. **Material connection.** The video states Discount Plumbing is a current client. If they receive anything of value for appearing, say so.
+1. **Substantiation file.** Keep records behind every objective claim: the 38% (calls, dates, method), the $83K+ (invoices or job records), the client's written permission to use the figure (the client is not named), and the date of that permission.
+2. **Material connection.** The video says the result is from a current client. If they receive anything of value for appearing, say so.
 3. **38% wording.** Say exactly what was measured: after-hours calls we placed to businesses listing 24/7 hours. Do not describe it as a statistic about all home service businesses.
 4. **Usage fees.** Texts, calls and AI are billed separately. Decide whether to state typical monthly usage in the video; "billed separately" alone can read as a hidden fee.
 5. **AI disclosure.** The video says the assistant identifies itself as a virtual assistant. Confirm the bot is actually configured that way, or remove the line. Some states require disclosure when a bot texts consumers.
