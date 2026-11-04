@@ -1,5 +1,5 @@
 import argparse, sys, csv, datetime, os
-from . import scrape, ghl, lineinfo, enrich, dialer, notes
+from . import scrape, ghl, lineinfo, enrich, dialer, notes, status
 from .config import *
 
 def cmd_scrape(a):
@@ -139,6 +139,7 @@ def main():
     s.add_argument("--ignore-window", action="store_true")
     s = sub.add_parser("manual-tasks", help="create the daily batch of manual-call tasks (best scores first)"); s.set_defaults(f=cmd_manual_tasks)
     s.add_argument("--per-day", type=int, default=MANUAL_PER_DAY); s.add_argument("--dry-run", action="store_true")
+    s = sub.add_parser("status", help="read-only system snapshot as JSON"); s.set_defaults(f=lambda a: status.main(a.out)); s.add_argument("--out")
     s = sub.add_parser("results"); s.set_defaults(f=cmd_results); s.add_argument("--out", default="data/results.csv")
     a = p.parse_args(); a.f(a)
 

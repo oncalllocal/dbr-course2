@@ -1,0 +1,49 @@
+name: MCTB dialer
+
+# SWITCHED OFF until tomorrow: manual runs only. After the first scheduled-session run is verified:
+#   1) add the secrets listed in docs/ACTIONS_SETUP.md
+#   2) run it once by hand with live=false (dry run) and check the log
+#   3) uncomment the schedule below and disable the Claude scheduled task, so only ONE dialer runs
+on:
+  workflow_dispatch:
+    inputs:
+      live:
+        description: "Dial for real? (false = dry run that only prints the plan)"
+        default: "false"
+  # schedule:
+  #   - cron: "5 23 * * 1-4"   # 7:05 PM Eastern during daylight time
+  #   - cron: "5 0 * * 2-5"    # 7:05 PM Eastern during standard time (the dialer's own window check decides which one may dial)
+
+concurrency:
+  group: mctb-dialer
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  dial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GHL_TOKEN: ${{ secrets.GHL_TOKEN }}
+      GHL_LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Dial
+        run: |
+          if [ "${{ github.event.inputs.live }}" = "true" ]; then
+            python -m mce dial --live --limit 60
+          else
+            python -m mce dial --limit 60
+          fi
+      - name: Status after the run
+        if: always()
+        run: python -m mce status

@@ -106,6 +106,8 @@ def sms_owner(text):
                   data={"To": to, "From": env["TWILIO_FROM_NUMBER"], "Body": text[:1500]}, timeout=30)
 
 def run(args):
+    if args.live and ghl.contacts_with_tag("mce-pause"):
+        print("PAUSED: a contact is tagged mce-pause. Nothing dialed. Remove the tag to resume."); return
     tz = ZoneInfo(args.tz); now = datetime.datetime.now(tz)
     queue = load_queue(args)[: args.limit]
     open_now = in_window(now, args.days, args.start, args.end)
