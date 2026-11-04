@@ -43,13 +43,14 @@ def outcome(status, answered_by):
     return "answered"            # human, unknown, or no AMD result: do not pester or mark as a prospect
 
 def twiml(leave_voicemail=False):
-    return f'<Response><Say voice="Polly.Joanna-Neural">{MESSAGE}</Say><Hangup/></Response>'
+    # DetectMessageEnd holds this TwiML until the voicemail greeting finishes (after the beep), so the whole message is recorded.
+    return f'<Response><Pause length="1"/><Say voice="Polly.Joanna-Neural">{MESSAGE}</Say><Hangup/></Response>'
 
 def place(to, from_, voicemail):
     env = twilio_env(); base = API.format(sid=env["TWILIO_ACCOUNT_SID"]); auth = (env["TWILIO_ACCOUNT_SID"], env["TWILIO_AUTH_TOKEN"])
     r = requests.post(f"{base}/Calls.json", auth=auth, timeout=30, data={
         "To": to, "From": from_, "Twiml": twiml(voicemail), "Timeout": 30,
-        "MachineDetection": "Enable", "MachineDetectionTimeout": 6})
+        "MachineDetection": "DetectMessageEnd", "MachineDetectionTimeout": 30})
     if r.status_code >= 300: raise RuntimeError(f"Twilio {r.status_code}: {r.text[:200]}")
     sid = r.json()["sid"]; end = time.time() + 120
     while time.time() < end:

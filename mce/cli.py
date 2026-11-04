@@ -115,7 +115,7 @@ def main():
     s.add_argument("--tz", default="America/New_York"); s.add_argument("--days", default="mon-thu")
     s.add_argument("--start", default="17:30"); s.add_argument("--end", default="20:30")
     s.add_argument("--pace", type=int, default=8, help="seconds between calls"); s.add_argument("--sms", action="store_true", help="text a summary to OWNER_PHONE")
-    s.add_argument("--leave-voicemail", action="store_true"); s.add_argument("--ignore-window", action="store_true")
+    s.add_argument("--ignore-window", action="store_true")
     s = sub.add_parser("results"); s.set_defaults(f=cmd_results); s.add_argument("--out", default="data/results.csv")
     a = p.parse_args(); a.f(a)
 
