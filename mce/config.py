@@ -22,6 +22,7 @@ TAG_24_7      = "mce-24-7"
 
 # Existing custom fields in the sub-account (looked up by fieldKey at runtime).
 FIELD_KEYS = {
+    "big_job":      "contact.mctb_big_job",
     "score":        "contact.mctb_lead_score",
     "source_query": "contact.audit_source_query",
     "reviews":      "contact.audit_maps_reviews",
@@ -41,3 +42,16 @@ STAGE_DNA = "Did not answer"
 TAG_MANUAL_TASKED = "mce-manual-tasked"
 MIN_SCORE = 25
 MANUAL_PER_DAY = 20
+
+# What a missed after-hours call could have been, by trade (owner-approved, 2026-11-04). Used in the first email.
+BIG_JOB = {
+    "plumber": "a $12,000 whole-home repipe",
+    "hvac contractor": "a $15,000 system replacement",
+    "electrician": "a whole-home generator installation",
+    "roofing contractor": "a full roof replacement",
+    "water damage restoration": "a Category 3 water loss job",
+    "garage door repair": "a full garage door replacement",
+}
+def big_job_for(query):
+    """query looks like 'plumber in Tampa FL'."""
+    return BIG_JOB.get((query or "").split(" in ")[0].strip().lower(), "")

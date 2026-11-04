@@ -28,7 +28,7 @@ def field_ids():
 def upsert_lead(l, extra_tags=()):
     ids = field_ids()
     vals = {"source_query": l["query"], "reviews": l["reviews"], "rating": l["rating"],
-            "trade": l.get("trade") or l["category"], "score": l.get("score")}
+            "trade": l.get("trade") or l["category"], "score": l.get("score"), "big_job": big_job_for(l.get("query"))}
     tags = [TAG_PROSPECT, *extra_tags]
     lt = l.get("line_type") or "unknown"
     tags.append(TAG_LINE.get(lt, TAG_LINE["unknown"]))

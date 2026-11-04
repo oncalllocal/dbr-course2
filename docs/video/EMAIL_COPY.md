@@ -3,7 +3,7 @@
 Send to the best address found: personal-looking (owner) first, then info/contact/office, then any other. Leads with no email stay on the call-only path.
 Send the morning after the SECOND miss (9:00 AM recipient time, Tue-Fri). Footer on every email: sender name, OnCall Local, physical address, one-click unsubscribe (CAN-SPAM).
 
-Merge fields: `{{contact.company_name}}`, `{{contact.audit_call_day}}`, `{{contact.audit_call_time}}`, and **`{{contact.mctb_big_job}}`** (to be created: set from the trade at import, e.g. plumbing = "a $12,000 whole-home repipe", HVAC = "a $15,000 system replacement"; other trades need owner-approved figures).
+Merge fields: `{{contact.company_name}}`, `{{contact.audit_call_day}}`, `{{contact.audit_call_time}}`, and **`{{contact.mctb_big_job}}`** (created in GHL; set by the importer from the trade: plumber = a $12,000 whole-home repipe; HVAC = a $15,000 system replacement; electrician = a whole-home generator installation; roofing = a full roof replacement; water damage = a Category 3 water loss job; garage door = a full garage door replacement. Dollar figures for the last four are not given yet, so the text carries none).
 
 All claims are true or conditional. Do not state that the recipient lost a job. Do not use third-party statistics.
 
@@ -17,7 +17,7 @@ We called {{contact.company_name}} {{contact.audit_call_day}} night at {{contact
 
 I'm not writing to scold you. I'm writing because of what that call could have been.
 
-If that had been a real customer, someone whose home just flooded and who needed {{contact.mctb_big_job}}, they wouldn't have waited for a callback. They would have hung up and called the next company on Google. And you would never have known the call happened.
+If that had been a real customer, ready to book {{contact.mctb_big_job}}, they wouldn't have waited for a callback. They would have hung up and called the next company on Google. And you would never have known the call happened.
 
 That's the part that stings: it isn't the one call, it's that the biggest jobs often come in at the worst times, from people who need an answer right now.
 
@@ -28,7 +28,7 @@ Would you mind if I sent you a short video (under 5 minutes) showing exactly how
 Sam
 OnCall Local
 
-## Email 1, version B (third person)
+## PARKED: Email 1, version B (third person). Owner chose first person for now (2026-11-04).
 **Subject:** `OnCall Local called {{contact.company_name}} at {{contact.audit_call_time}}`
 
 Hello,
