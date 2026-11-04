@@ -27,6 +27,15 @@ def cmd_lookup(a):
     lineinfo.classify_all(leads); _rewrite(a.csv, leads)
     from collections import Counter; print(dict(Counter(l["line_type"] for l in leads)))
 
+def cmd_cells(a):
+    stage = ghl.pipeline_stage(PIPELINE_NAME, STAGE_MANUAL)
+    if not stage: sys.exit(f'pipeline "{PIPELINE_NAME}" / stage "{STAGE_MANUAL}" not found')
+    for c in ghl.list_contacts(TAG_CELL_MANUAL):
+        have = ghl.call("GET", "/opportunities/search", params={"location_id": ghl.ghl_location(), "contact_id": c["id"], "pipeline_id": stage[0]}).get("opportunities", [])
+        name = c.get("companyName") or c.get("contactName")
+        if have: print("already in pipeline:", name); continue
+        ghl.add_opportunity(c["id"], name, *stage); print("added:", name)
+
 def cmd_rescore(a):
     leads = scrape.rescore(scrape.read_csv(a.csv)); _rewrite(a.csv, leads); print(f"rescored {len(leads)} leads")
 
@@ -91,6 +100,7 @@ def main():
     s.add_argument("--lookup", action="store_true", help="classify line type (mobile/landline/voip/tollfree)")
     s.add_argument("--enrich", action="store_true", help="find a public email on each lead's website")
     s = sub.add_parser("lookup"); s.set_defaults(f=cmd_lookup); s.add_argument("csv")
+    s = sub.add_parser("cells-to-pipeline", help="put every mce-cell-manual contact into the Manual Call stage (skips ones already there)"); s.set_defaults(f=cmd_cells)
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)
