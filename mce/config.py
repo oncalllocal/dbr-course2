@@ -36,3 +36,4 @@ TAG_LINE = {"mobile": "mce-line-mobile", "landline": "mce-line-landline", "voip"
             "tollfree": "mce-line-tollfree", "unknown": "mce-line-unknown"}
 PIPELINE_NAME = "Missed Call Prospects"
 STAGE_MANUAL = "Manual Call - Cell"
+STAGE_DNA = "Did not answer"

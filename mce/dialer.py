@@ -93,6 +93,8 @@ def record(c, result, call_day, call=None, tz="America/New_York"):
         history = [prev, f"{when.strftime('%A %-I:%M %p')}: {result}"]
         due = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).strftime("%Y-%m-%dT14:00:00.000Z")
         ghl.add_task(cid, f"Call {c['name']}: missed our after-hours call (2 evenings)", notes.prospect_task(full, fields, history, tz), due)
+        try: print("  pipeline:", ghl.ensure_opportunity(cid, c["name"], STAGE_DNA))
+        except Exception as e: print("  pipeline warn:", str(e)[:140])
     else:
         ghl.add_tags(cid, [TAG_ATTEMPT])
 

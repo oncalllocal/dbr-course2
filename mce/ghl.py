@@ -103,3 +103,16 @@ def field_values(contact):
     """Our audit_* custom fields on a contact as {short_name: value}."""
     rev = {v: k for k, v in field_ids().items() if v}
     return {rev[f["id"]]: f.get("value") for f in contact.get("customFields", []) if f.get("id") in rev}
+
+
+def ensure_opportunity(contact_id, name, stage_name, pipeline_name=None):
+    """Create the opportunity in the given stage, or move it there if one already exists. Returns 'created', 'moved' or 'unchanged'."""
+    from .config import PIPELINE_NAME
+    ps = pipeline_stage(pipeline_name or PIPELINE_NAME, stage_name)
+    if not ps: raise RuntimeError(f"stage {stage_name!r} not found")
+    pid, sid = ps
+    have = call("GET", "/opportunities/search", params={"location_id": ghl_location(), "contact_id": contact_id, "pipeline_id": pid}).get("opportunities", [])
+    if not have:
+        add_opportunity(contact_id, name, pid, sid); return "created"
+    if have[0].get("pipelineStageId") == sid: return "unchanged"
+    call("PUT", f"/opportunities/{have[0]['id']}", json={"pipelineStageId": sid}); return "moved"
