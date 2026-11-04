@@ -47,38 +47,57 @@ def _due_tomorrow_9am():
     d = datetime.datetime.utcnow().date() + datetime.timedelta(days=1)
     return datetime.datetime(d.year, d.month, d.day, 14, 0).strftime("%Y-%m-%dT%H:%M:%S.000Z")  # 9 AM Central
 
+def _next_business_day_9am_utc():
+    from zoneinfo import ZoneInfo
+    d = datetime.datetime.now(ZoneInfo("America/New_York")).date() + datetime.timedelta(days=1)
+    while d.weekday() >= 5: d += datetime.timedelta(days=1)
+    return datetime.datetime(d.year, d.month, d.day, 9, tzinfo=ZoneInfo("America/New_York")).astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
 def cmd_push(a):
     leads = scrape.read_csv(a.csv)
-    if a.skip_tollfree: leads = [l for l in leads if l.get("line_type") != "tollfree"]
-    leads = leads[: a.limit]
+    leads = [l for l in leads if l["score"] >= a.min_score and not (a.skip_tollfree and l.get("line_type") == "tollfree")]
+    leads = leads[: a.limit] if a.limit else leads
     extra = [t for t in (a.tags or "").split(",") if t]
+    from collections import Counter
+    lt = Counter(l.get("line_type") or "unknown" for l in leads)
     if a.dry_run:
-        from collections import Counter
-        print(f"[dry-run] would upsert {len(leads)} contacts; line types {dict(Counter(l.get('line_type') or 'unknown' for l in leads))}")
-        print(f"[dry-run] mobile -> manual-call (tag {TAG_CELL_MANUAL}, task, pipeline stage); others -> dial queue only with --queue"); return
-    if a.skip_tollfree: leads = [l for l in leads if l.get("line_type") != "tollfree"]
+        print(f"[dry-run] would upsert {len(leads)} contacts (score >= {a.min_score}); line types {dict(lt)}")
+        print(f"[dry-run] mobile -> manual list (tag {TAG_CELL_MANUAL} + pipeline stage; tasks come from `mce manual-tasks`); VoIP/landline -> dial queue only with --queue"); return
     stage = ghl.pipeline_stage(PIPELINE_NAME, STAGE_MANUAL)
-    if not stage: print(f'note: pipeline "{PIPELINE_NAME}" with stage "{STAGE_MANUAL}" not found; cell leads get the tag + a task only')
-    counts = {"queued": 0, "manual": 0, "held": 0, "pushed": 0}
-    for l in leads:
-        cid, new = ghl.upsert_lead(l, extra)
-        lt = l.get("line_type") or "unknown"
-        if lt == "mobile":                       # never auto-dialed; owner calls by hand
+    if not stage: print(f'note: pipeline "{PIPELINE_NAME}" / stage "{STAGE_MANUAL}" not found; cell leads get the tag only')
+    counts = {"queued": 0, "manual": 0, "held": 0, "pushed": 0, "skipped_already_worked": 0}
+    for l in leads:                                  # already sorted best-first by the scraper
+        cid, new, tags = ghl.upsert_lead(l, extra)
+        kind = l.get("line_type") or "unknown"
+        if kind == "mobile":                         # never auto-dialed
             counts["manual"] += 1
             try:
-                pc = {"companyName": l["name"], "phone": l["phone"], "website": l.get("website"), "email": l.get("email"), "address1": l.get("address"), "tags": ["mce-line-mobile"] + (["mce-24-7"] if l["is_24_7"] else [])}
-                ghl.add_task(cid, f'Call (cell) {l["name"]}', notes.manual_task(pc, {"rating": l.get("rating"), "reviews": l.get("reviews"), "trade": l.get("trade") or l.get("category")}), _due_tomorrow_9am())
-                if stage: ghl.add_opportunity(cid, l["name"], *stage)
+                if stage: ghl.ensure_opportunity(cid, l["name"], STAGE_MANUAL)
             except Exception as e: print("  warn:", str(e)[:160])
-            print(f'manual-call {l["name"]} {l["phone"]}')
-        elif a.queue and (lt != "unknown" or a.allow_unknown):
+        elif a.queue and (kind != "unknown" or a.allow_unknown):
+            if {"mce-answered", "mce-no-answer", "mce-dnc", "mce-test"} & set(tags) or "mce-dial-queue" in tags:
+                counts["skipped_already_worked"] += 1; continue      # never re-queue someone already called or opted out
             ghl.add_tags(cid, [TAG_QUEUE]); counts["queued"] += 1
-            print(f'queued {l["name"]} {lt}')
-        elif a.queue:
-            counts["held"] += 1; print(f'held (line type unknown, use --allow-unknown) {l["name"]}')
-        else:
-            counts["pushed"] += 1; print(f'pushed {l["name"]} {lt}')
+        elif a.queue: counts["held"] += 1
+        else: counts["pushed"] += 1
     print(counts)
+
+def cmd_manual_tasks(a):
+    """Create call tasks for the best untasked mobile leads, up to --per-day, due the next business day 9 AM Eastern."""
+    sid = ghl.field_ids().get("score")
+    cells = [c for c in ghl.contacts_with_tag(TAG_CELL_MANUAL)
+             if TAG_MANUAL_TASKED not in [t.lower() for t in c.get("tags", [])]
+             and "mce-dnc" not in [t.lower() for t in c.get("tags", [])] and not c.get("dnd")]
+    key = lambda c: -next((float(f.get("value") or 0) for f in c.get("customFields", []) if f.get("id") == sid), 0.0)
+    todo = sorted(cells, key=key)[: a.per_day]
+    print(f"{len(cells)} cell leads without a task; creating {len(todo)} (limit {a.per_day}/day)")
+    due = _next_business_day_9am_utc()
+    for c in todo:
+        full = ghl.call("GET", f"/contacts/{c['id']}")["contact"]; f = ghl.field_values(full)
+        name = full.get("companyName") or full.get("contactName")
+        if a.dry_run: print(f"  [dry-run] {name} score {f.get('score')}"); continue
+        ghl.add_task(c["id"], f"Call (cell) {name}", notes.manual_task(full, f), due)
+        ghl.add_tags(c["id"], [TAG_MANUAL_TASKED]); print(f"  task: {name}")
 
 def cmd_results(a):
     rows = []
@@ -105,7 +124,8 @@ def main():
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)
-    s.add_argument("csv"); s.add_argument("--limit", type=int, default=50)
+    s.add_argument("csv"); s.add_argument("--limit", type=int, default=0, help="0 = every lead that qualifies")
+    s.add_argument("--min-score", type=int, default=MIN_SCORE)
     s.add_argument("--tags", help="extra tags, comma list"); s.add_argument("--dry-run", action="store_true")
     s.add_argument("--allow-unknown", action="store_true", help="auto-dial numbers whose line type is unknown")
     s.add_argument("--skip-tollfree", action="store_true", help="leave toll-free numbers out of the import")
@@ -117,6 +137,8 @@ def main():
     s.add_argument("--start", default="19:00"); s.add_argument("--end", default="19:45")
     s.add_argument("--pace", type=int, default=8, help="seconds between calls"); s.add_argument("--sms", action="store_true", help="text a summary to OWNER_PHONE")
     s.add_argument("--ignore-window", action="store_true")
+    s = sub.add_parser("manual-tasks", help="create the daily batch of manual-call tasks (best scores first)"); s.set_defaults(f=cmd_manual_tasks)
+    s.add_argument("--per-day", type=int, default=MANUAL_PER_DAY); s.add_argument("--dry-run", action="store_true")
     s = sub.add_parser("results"); s.set_defaults(f=cmd_results); s.add_argument("--out", default="data/results.csv")
     a = p.parse_args(); a.f(a)
 

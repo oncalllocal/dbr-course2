@@ -64,13 +64,14 @@ def load_queue(args):
     if args.from_csv:
         from .scrape import read_csv
         rows = [r for r in read_csv(args.from_csv) if r.get("line_type") in ("landline", "voip", "tollfree") or args.allow_unknown]
-        return [{"id": None, "name": r["name"], "phone": r["phone"], "tags": []} for r in rows]
-    out = []
+        return sorted([{"id": None, "name": r["name"], "phone": r["phone"], "tags": [], "score": r["score"]} for r in rows], key=lambda x: -x["score"])
+    out, sid = [], ghl.field_ids().get("score")
     for c in ghl.contacts_with_tag(TAG_QUEUE):
         tags = [t.lower() for t in c.get("tags", [])]
         if TAG_DNC in tags or c.get("dnd") or TAG_CELL_MANUAL in tags: continue
-        out.append({"id": c["id"], "name": c.get("companyName") or c.get("contactName"), "phone": c.get("phone"), "tags": tags})
-    return out
+        sc = next((float(f.get("value") or 0) for f in c.get("customFields", []) if f.get("id") == sid), 0.0)
+        out.append({"id": c["id"], "name": c.get("companyName") or c.get("contactName"), "phone": c.get("phone"), "tags": tags, "score": sc})
+    return sorted(out, key=lambda x: -x["score"])          # best leads first
 
 def record(c, result, call_day, call=None, tz="America/New_York"):
     cid = c["id"]

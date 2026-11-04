@@ -28,7 +28,7 @@ def field_ids():
 def upsert_lead(l, extra_tags=()):
     ids = field_ids()
     vals = {"source_query": l["query"], "reviews": l["reviews"], "rating": l["rating"],
-            "trade": l.get("trade") or l["category"]}
+            "trade": l.get("trade") or l["category"], "score": l.get("score")}
     tags = [TAG_PROSPECT, *extra_tags]
     lt = l.get("line_type") or "unknown"
     tags.append(TAG_LINE.get(lt, TAG_LINE["unknown"]))
@@ -42,7 +42,7 @@ def upsert_lead(l, extra_tags=()):
                          if ids.get(k) and v not in (None, "")],
     }
     res = call("POST", "/contacts/upsert", json=body)
-    return res["contact"]["id"], res.get("new", None)
+    return res["contact"]["id"], res.get("new", None), [t.lower() for t in res["contact"].get("tags", [])]
 
 def add_tags(contact_id, tags):
     return call("POST", f"/contacts/{contact_id}/tags", json={"tags": list(tags)})

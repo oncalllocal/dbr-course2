@@ -22,6 +22,7 @@ TAG_24_7      = "mce-24-7"
 
 # Existing custom fields in the sub-account (looked up by fieldKey at runtime).
 FIELD_KEYS = {
+    "score":        "contact.mctb_lead_score",
     "source_query": "contact.audit_source_query",
     "reviews":      "contact.audit_maps_reviews",
     "rating":       "contact.audit_maps_rating",
@@ -37,3 +38,6 @@ TAG_LINE = {"mobile": "mce-line-mobile", "landline": "mce-line-landline", "voip"
 PIPELINE_NAME = "Missed Call Prospects"
 STAGE_MANUAL = "Manual Call - Cell"
 STAGE_DNA = "Did not answer"
+TAG_MANUAL_TASKED = "mce-manual-tasked"
+MIN_SCORE = 25
+MANUAL_PER_DAY = 20
