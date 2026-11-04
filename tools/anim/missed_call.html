@@ -15,7 +15,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#f3f7fb;font-fam
 .status{height:54px;padding:18px 34px 0;display:flex;justify-content:space-between;font-weight:600;font-size:21px}
 /* results */
 #results{background:#f6f8fb}
-.search{margin:6px 20px 14px;height:58px;border-radius:30px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;align-items:center;padding:0 22px;font-size:24px;font-weight:500;color:#1f3347}
+.search{margin:6px 20px 14px;height:58px;border-radius:30px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;align-items:center;padding:0 22px;font-size:22px;font-weight:500;color:#1f3347;white-space:nowrap}
 .map{margin:0 0 6px;height:210px;background:#dfe9f0;position:relative;overflow:hidden}
 .map i{position:absolute;background:#fff}
 .pin{position:absolute;width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#e5483b}
@@ -36,8 +36,9 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#f3f7fb;font-fam
 .b{max-width:82%;padding:16px 22px;border-radius:26px;font-size:24px;font-weight:500;line-height:1.38;opacity:0}
 .b.in{align-self:flex-start;background:#e6ecf2}.b.out{align-self:flex-end;background:#F47920;color:#fff}
 .inp{position:absolute;left:14px;right:14px;bottom:26px;height:64px;border-radius:32px;background:#fff;border:1px solid #d5dee7;padding:0 24px;display:flex;align-items:center;font-size:24px;font-weight:500}
-#banner{position:absolute;left:12px;right:12px;top:14px;border-radius:26px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.28);padding:16px 18px;opacity:0;z-index:5}
-#banner b{font-size:22px;font-weight:700}#banner small{float:right;color:#5f7890;font-size:18px}#banner div{font-size:23px;font-weight:500;margin-top:6px;line-height:1.3}
+#banner{position:absolute;left:26px;right:26px;top:500px;border-radius:32px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.40);padding:30px 28px 34px;opacity:0;z-index:6}
+#banner .hd{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;letter-spacing:.08em;color:#5f7890}#banner .ic{width:32px;height:32px;border-radius:8px;background:#34c759;display:inline-block}#banner .hd span:last-child{margin-left:auto;font-weight:500;letter-spacing:0}#banner b{display:block;margin-top:18px;font-size:30px;font-weight:700}#banner .tx{font-size:28px;font-weight:500;margin-top:10px;line-height:1.32}
+#scrim{position:absolute;inset:0;background:rgba(13,27,42,.55);opacity:0;z-index:5}
 #tap{position:absolute;width:70px;height:70px;border-radius:50%;border:5px solid #F47920;background:rgba(244,121,32,.25);opacity:0;z-index:9;transform:translate(-50%,-50%)}
 </style></head><body>
 <div class="topbar"></div>
@@ -53,7 +54,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#f3f7fb;font-fam
    <div class="pin" style="left:140px;top:84px"></div><div class="pin" style="left:300px;top:128px;background:#7b93a8"></div></div>
   <div class="card fade"><h3 id="n1">Your Company</h3><p id="p1"></p><div class="btns"><div class="btn call" id="btnCall1">Call</div><div class="btn">Website</div><div class="btn">Directions</div></div></div>
   <div class="card fade"><h3 id="n2">Next Plumbing Co</h3><p id="p2"></p><div class="btns"><div class="btn call" id="btnCall2">Call</div><div class="btn">Website</div><div class="btn">Directions</div></div></div>
-  <div id="banner"><small>now</small><b id="bn">Your Company</b><div id="bt">Sorry we missed your call! How can we help you?</div></div>
+  <div id="scrim"></div><div id="banner"><div class="hd"><span class="ic"></span><span>MESSAGES</span><span>now</span></div><b id="bn">Your Company</b><div class="tx" id="bt">Sorry we missed your call! How can we help you?</div></div>
  </div>
  <div id="call1" class="layer callscr"><div class="status" style="color:#fff"><span>9:02 PM</span><span></span></div><div class="av" id="av1">Y</div><div class="cn" id="cn1">Your Company</div><div class="cs" id="cs1"></div><div class="end">✆</div></div>
  <div id="call2" class="layer callscr"><div class="status" style="color:#fff"><span>9:03 PM</span><span></span></div><div class="av" id="av2">N</div><div class="cn" id="cn2">Next Plumbing Co</div><div class="cs" id="cs2"></div><div class="end">✆</div></div>
@@ -105,12 +106,11 @@ const T={tap1:3.7,call1:3.9,ring:4.7,noans:7.8,back:8.8,
   tap2:MODE==='before'?10.45:11.2,after:MODE==='before'?10.8:11.5,conn:11.8};
 const REST=[1900,1300];
 function handPath(){            // [time, x, y] keyframes, resolved against live DOM positions
-  const c1=centre($('btnCall1')),c2=centre($('btnCall2')),bn=centre($('banner'));
-  const bnY=bn[1]+0;
+  const c1=centre($('btnCall1')),c2=centre($('btnCall2')),sr=$('screen').getBoundingClientRect(),b=$('banner'),bn=[sr.left+sr.width/2,sr.top+b.offsetTop+b.offsetHeight/2];
   const first=[[2.6,...REST],[3.6,c1[0],c1[1]+6],[3.95,c1[0],c1[1]+6],[4.9,...REST]];
   const second=MODE==='before'
    ?[[9.0,...REST],[10.35,c2[0],c2[1]+6],[10.75,c2[0],c2[1]+6],[11.8,...REST]]
-   :[[9.0,...REST],[9.9,c2[0]+70,c2[1]+70],[10.5,c2[0]+55,c2[1]+55],[11.15,1355,150],[11.5,1355,150],[12.4,...REST]];
+   :[[9.0,...REST],[9.9,c2[0]+70,c2[1]+70],[10.5,c2[0]+55,c2[1]+55],[11.15,bn[0],bn[1]+10],[11.5,bn[0],bn[1]+10],[12.4,...REST]];
   return first.concat(second);
 }
 function handAt(t){
@@ -137,7 +137,7 @@ function render(t){
  $('cs1').textContent=t<T.ring?'Calling'+dots:(t<T.noans?'Ringing'+dots:'No answer');$('cs1').style.color=t>=T.noans?'#ff6b5e':'#b9c8d6';
  const k=t-T.conn;$('cs2').textContent=t<T.conn?'Calling'+dots:`Connected  0:0${Math.min(9,Math.max(0,Math.floor(k)))}`;$('cs2').style.color=t>=T.conn?'#5fe39b':'#b9c8d6';
  // banner (after): pops just before the hand reaches the next company
- if(MODE==='after'){const bb=ramp(t,9.9,10.25);const p=1+.06*Math.sin(ramp(t,9.9,10.3)*Math.PI);$('banner').style.opacity=t<T.after?bb:0;$('banner').style.transform=`translateY(${(1-bb)*-70}px) scale(${p})`}else $('banner').style.opacity=0;
+ if(MODE==='after'){const bb=ramp(t,9.9,10.3);const pop=.82+.18*(bb<1?Math.sin(bb*Math.PI/2)*1.06:1);const live=t<T.after;$('banner').style.opacity=live?bb:0;$('banner').style.transform=`scale(${Math.min(1.04,pop)})`;$('scrim').style.opacity=live?bb:0}else{$('banner').style.opacity=0;$('scrim').style.opacity=0}
  // messages
  const pop=(id,a)=>{const v=ramp(t,a,a+.35);$(id).style.opacity=v;$(id).style.transform=`translateY(${(1-v)*16}px)`};
  pop('b1',11.6);pop('b2',14.6);pop('b3',15.4);

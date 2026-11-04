@@ -7,7 +7,7 @@
    "type": "title",
    "title": "It's 9 PM. The *phone rings*. *Nobody answers.*",
    "sub": "What one unanswered call can cost a home service company",
-   "narration": "It's nine at night. A homeowner has water coming through the ceiling. They call the first plumber they find online. It rings, and rings. Nobody picks up. Many callers won't leave a voicemail. They call the next company on the list. And just like that, a job is gone before anyone knew it existed."
+   "narration": "Picture this. It's nine o'clock at night, and a homeowner has water coming through the ceiling. They grab their phone, search for a plumber, and call the first name they see. It rings. And rings. Nobody picks up. They're not going to leave a voicemail. They've got water coming through the ceiling. So they hang up, and call the next company on the list. And you'd never even know it happened."
   },
   {
    "type": "bullets",
@@ -20,14 +20,14 @@
     "A Category 3 water loss job: *$100,000*"
    ],
    "note": "Examples of large jobs by trade. Actual job values and outcomes vary.",
-   "narration": "That call was not a two hundred dollar service visit. It could have been a twelve thousand dollar repipe. A fifteen thousand dollar H V A C system. A thirty thousand dollar roof. Or a hundred thousand dollar water loss job. The biggest jobs often come at the worst times, from people who need an answer right now."
+   "narration": "Here's what makes that so painful. That call wasn't a two hundred dollar service visit. Depending on your trade, it could have been a twelve thousand dollar repipe. A fifteen thousand dollar H V A C system. A thirty thousand dollar roof. Even a water loss job worth a hundred thousand. And the big jobs don't wait for business hours. They show up at the worst possible time, from people who need an answer right now."
   },
   {
    "type": "stat",
    "big": "38%",
    "label": "of calls go *unanswered*, even at businesses that list *24/7 hours*",
    "note": "Based on OnCall Local's after-hours calls to home service businesses listing 24/7 hours. Sample: N = ___ calls, ___ to ___. DRAFT: confirm before use.",
-   "narration": "Here's what we're seeing. Among home service businesses that list their hours as twenty-four seven, thirty-eight percent of calls go unanswered. That isn't because those owners are careless. It's because everyone misses calls. Period."
+   "narration": "Now, you might be thinking, I'm covered, my phone's on twenty-four seven. Here's what we've found. Among home service businesses that list their hours as twenty-four seven, thirty-eight percent of calls go unanswered. And that's not because those owners don't care. It's because everyone misses calls. Period."
   },
   {
    "type": "cols",
@@ -46,26 +46,29 @@
      "p": "Staffed phones still miss calls."
     }
    ],
-   "narration": "You can't be everywhere. You're under a sink, on a roof, or with another customer. Or you're finally having dinner. Even companies with a team answering the phones around the clock still miss calls. No one can pick up every call."
+   "narration": "Think about your day. You're under a sink, up on a roof, or in the middle of a job with another customer. Or you're finally sitting down to dinner. Even companies with a team answering the phones around the clock still miss calls. Nobody can pick up every single one. So let's look at what actually happens when a call gets missed."
   },
   {
    "type": "clip",
    "clip": "clips/missed_call_before.mp4",
    "note": "Illustration only. Not a real customer or call.",
-   "narration": "Here's what happens today. A homeowner searches for a plumber and finds you. They tap call. It rings. Nobody answers. So they go back, tap the next company on the list, and that company picks up. That's the job, gone, before you ever knew it existed."
+   "narration": "Here's the customer's side of it. They search. They find you. They tap call. It rings, and nobody answers. So they go back to the list, tap the next company, and that company picks up. Just like that, the job is gone, before you ever knew it existed.",
+   "transition": "smoothleft"
   },
   {
    "type": "clip",
    "clip": "clips/missed_call_after.mp4",
    "note": "Illustration only. Not a real customer or call.",
-   "narration": "Now the same call, with missed call text back. They tap call. Nobody answers. But just before they tap the next company, a text pops up from your business, asking how it can help. The conversation has started, and you call back first, before anyone else has picked up."
+   "narration": "Now watch the same moment with missed call text back. They tap call. Nobody answers. But right before they tap the next company, a text pops up from your business. Sorry we missed your call, how can we help? The conversation has started, and it started with you.",
+   "transition": "fade"
   },
   {
    "type": "stat",
    "big": "$83K+",
    "label": "in *sold jobs* this year for *Discount Plumbing*",
    "note": "Discount Plumbing is a current OnCall Local client in Northern California. $83,000+ in sold jobs this year, per the client's records. One client's result. Results vary and are not guaranteed; they depend on call volume, response speed, pricing and follow-up.",
-   "narration": "One of our clients is Discount Plumbing, a plumbing company in Northern California. They already have twenty-four seven, three sixty-five human call answering, using their own employees. Even so, calls slipped through. With missed call text back working behind their team, they've sold over eighty-three thousand dollars in jobs this year, work that might have gone to the next plumber on the caller's list."
+   "narration": "And this isn't theory. One of our clients is Discount Plumbing, in Northern California. They already have their own employees answering the phones twenty-four seven, three sixty-five. And still, calls slipped through. With missed call text back running behind their team, they've sold over eighty-three thousand dollars in jobs this year. Work that might have gone to the next plumber on the list.",
+   "transition": "fadeblack"
   },
   {
    "type": "bullets",
@@ -77,12 +80,12 @@
     "You get the *whole conversation*, and you *call back first*"
    ],
    "note": "The text assistant is an AI and introduces itself as your business's virtual assistant.",
-   "narration": "Here's how it works. A call comes in and goes unanswered. Within seconds, the caller gets a text from your business. An assistant finds out who they are and what they need. Then you get the whole conversation on your phone, so you can call them back first."
+   "narration": "So how does it work? When a call goes unanswered, the caller gets a text from your business within seconds. A virtual assistant asks what's going on and gets the details. Then you get the whole conversation on your phone, and you call them back first."
   },
   {
    "type": "quote",
    "text": "You don't have to answer *every* call. You just have to be the *first to respond*.",
-   "narration": "Think about what the customer is doing. They're not waiting. They're searching. A text starts the conversation while they're still deciding who to hire. You don't need to answer every call. You just need to be the first one to respond."
+   "narration": "And that's really the whole idea. These customers aren't waiting around. They're shopping, right now. A text starts the conversation while they're still deciding who to hire. You don't have to answer every call. You just have to be the first to respond."
   },
   {
    "type": "cols",
@@ -101,7 +104,7 @@
      "p": "Read the conversation, then call the customer."
     }
    ],
-   "narration": "There's nothing for you to build. We set everything up in your account. You keep your own phone number. If you don't pick up after a few rings, the call forwards and the text goes out. Then you read the conversation, and call the customer back."
+   "narration": "The best part is, there's nothing for you to build. We set everything up inside your account. You keep your own phone number. If you don't pick up after a few rings, the call forwards, and the text goes out. All you do is read the conversation, and call them back."
   },
   {
    "type": "bullets",
@@ -112,20 +115,21 @@
     "*No contract*, cancel anytime"
    ],
    "note": "Founder pricing: $497 first month (includes setup), then $247/month. Text, call and AI usage is billed separately. Pricing may change for future customers.",
-   "narration": "Founder pricing is four hundred ninety-seven dollars for your first month, then two hundred forty-seven dollars a month. There's no contract, and you can cancel anytime. Text and A I usage is billed separately."
+   "narration": "So what does it cost? Right now, we're offering founder pricing. Four hundred ninety-seven dollars for your first month, then two hundred forty-seven dollars a month after that. No contract, and you can cancel anytime. Text and A I usage is billed separately."
   },
   {
    "type": "stat",
    "big": "1 job",
    "label": "can cover *more than a year* of service",
    "note": "Illustration only. A $4,000 job exceeds the first year's service cost ($497 + 11 x $247 = $3,214). Results are not guaranteed.",
-   "narration": "Do the math. One four thousand dollar garage door replacement covers more than a year of service. One repipe covers several years. And the call that starts it could be the one you miss tonight."
+   "narration": "And think about the math for a second. One four thousand dollar garage door replacement covers more than a year of service. One repipe covers years. And the call that starts it could be the one you miss tonight."
   },
   {
    "type": "title",
    "title": "Reply to the email and *say you're in*",
    "sub": "We'll get you set up",
-   "narration": "If this makes sense for your business, just reply to the email and say you're interested. We'll take it from there. Thanks for watching."
+   "narration": "If this sounds like something you'd want working for you, just reply to the email and say you're in. We'll take it from there. Thanks for watching.",
+   "transition": "fadeblack"
   }
  ]
 }

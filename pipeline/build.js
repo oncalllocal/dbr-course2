@@ -49,9 +49,10 @@ function loadLesson(file) {
 
 async function render(item, browser) {
   const { lesson, resolve } = item, id = lesson.id;
-  const work = path.join(outDir, 'work_' + id); fs.rmSync(work, { recursive: true, force: true }); fs.mkdirSync(work, { recursive: true });
+  const outName = lesson.out || id; const work = path.join(outDir, 'work_' + outName); fs.rmSync(work, { recursive: true, force: true }); fs.mkdirSync(work, { recursive: true });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-  const segs = []; let srt = '', t = 0, voiced = 0, chars = 0, missing = [];
+  const segs = [], durs = [], trans = []; const XF = 0.45;   // crossfade length; each segment starts with XF of silence so the dissolve never clips a word
+  let srt = '', t = 0, voiced = 0, chars = 0, missing = [];
   for (let i = 0; i < lesson.slides.length; i++) {
     const s = lesson.slides[i], n = String(i).padStart(2, '0');
     const imgPath = s.type === 'shot' && fs.existsSync(resolve(s.image)) ? resolve(s.image) : null;
@@ -71,7 +72,8 @@ async function render(item, browser) {
     }
     if (!fs.existsSync(wav)) { const d = Math.max(3, s.narration.trim().split(/\s+/).length / 2.5); run(`ffmpeg -y -loglevel error -f lavfi -i anullsrc=r=44100:cl=stereo -t ${d.toFixed(2)} "${wav}"`); }
     const clipFile = s.type === 'clip' ? resolve(s.clip) : null;
-    const d = Math.max(dur(wav) + 0.6, clipFile && fs.existsSync(clipFile) ? dur(clipFile) : 0), seg = `${work}/seg${n}.mp4`;
+    const d = Math.max(dur(wav) + 0.6 + XF, clipFile && fs.existsSync(clipFile) ? dur(clipFile) : 0), seg = `${work}/seg${n}.mp4`;
+    durs.push(d); trans.push(s.transition || 'fade');
     let filter = '[0:v]null[vout]', extra = '';
     if (s.type === 'shot' && s.pointer) {
       const rect = await shotRect(page), ps = [].concat(s.pointer);
@@ -86,18 +88,25 @@ async function render(item, browser) {
       extra = files.map(f => `-loop 1 -t ${d.toFixed(2)} -i "${f}"`).join(' ');
     }
     if (clipFile && fs.existsSync(clipFile)) {
-      run(`ffmpeg -y -loglevel error -i "${clipFile}" -i "${wav}" -filter_complex "[0:v]scale=1920:1080,tpad=stop_mode=clone:stop_duration=${d.toFixed(2)},fps=30,format=yuv420p[vout]" -map "[vout]" -map 1:a -af apad=pad_dur=${d.toFixed(2)} -t ${d.toFixed(2)} -c:v libx264 -preset medium -crf 20 -r 30 -c:a aac -b:a 160k "${seg}"`);
-      segs.push(`file 'seg${n}.mp4'`); srt += `${i + 1}\n${stamp(t)} --> ${stamp(t + d - 0.5)}\n${captionText(s.caption || s.narration)}\n\n`; t += d; continue;
+      run(`ffmpeg -y -loglevel error -i "${clipFile}" -i "${wav}" -filter_complex "[0:v]scale=1920:1080,tpad=stop_mode=clone:stop_duration=${d.toFixed(2)},fps=30,format=yuv420p[vout]" -map "[vout]" -map 1:a -af "adelay=${XF * 1000}|${XF * 1000},apad=pad_dur=${d.toFixed(2)}" -t ${d.toFixed(2)} -c:v libx264 -preset medium -crf 20 -r 30 -c:a aac -b:a 160k "${seg}"`);
+      segs.push(`file 'seg${n}.mp4'`); srt += `${i + 1}\n${stamp(t)} --> ${stamp(t + d - 0.5)}\n${captionText(s.caption || s.narration)}\n\n`; t += d - XF; continue;
     }
     const maps = filter.startsWith('-filter') ? filter : `-filter_complex "${filter}" -map "[vout]" -map 1:a`;
-    run(`ffmpeg -y -loglevel error -loop 1 -t ${d.toFixed(2)} -i ${work}/s${n}.png -i "${wav}" ${extra} ${maps} -af apad=pad_dur=0.6 -t ${d.toFixed(2)} -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -r 30 -c:a aac -b:a 160k "${seg}"`);
+    run(`ffmpeg -y -loglevel error -loop 1 -t ${d.toFixed(2)} -i ${work}/s${n}.png -i "${wav}" ${extra} ${maps} -af "adelay=${XF * 1000}|${XF * 1000},apad=pad_dur=0.6" -t ${d.toFixed(2)} -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -r 30 -c:a aac -b:a 160k "${seg}"`);
     segs.push(`file 'seg${n}.mp4'`);
-    srt += `${i + 1}\n${stamp(t)} --> ${stamp(t + d - 0.5)}\n${captionText(s.caption || s.narration)}\n\n`; t += d;
+    srt += `${i + 1}\n${stamp(t)} --> ${stamp(t + d - 0.5)}\n${captionText(s.caption || s.narration)}\n\n`; t += d - XF;
   }
   await page.close();
-  fs.writeFileSync(`${work}/list.txt`, segs.join('\n'));
-  const base = path.join(outDir, id); fs.writeFileSync(base + '.srt', srt);
-  run(`ffmpeg -y -loglevel error -f concat -safe 0 -i ${work}/list.txt -i ${base}.srt -c:v copy -af loudnorm=I=-16:TP=-1.5:LRA=11 -ar 44100 -c:a aac -b:a 160k -c:s mov_text -metadata:s:s:0 language=eng ${base}.mp4`);
+  const base = path.join(outDir, outName); fs.writeFileSync(base + '.srt', srt);
+  const n = segs.length; const ins = segs.map((_, i) => `-i ${work}/seg${String(i).padStart(2, '0')}.mp4`).join(' ');
+  let vf = '', af = '', vlast = '[0:v]', alast = '[0:a]', acc = 0;
+  for (let i = 1; i < n; i++) {
+    acc += durs[i - 1]; const off = (acc - i * XF).toFixed(3), vo = i === n - 1 ? 'vout' : `v${i}`, ao = i === n - 1 ? 'aout' : `a${i}`;
+    vf += `${vlast}[${i}:v]xfade=transition=${trans[i]}:duration=${XF}:offset=${off}[${vo}];`; af += `${alast}[${i}:a]acrossfade=d=${XF}[${ao}];`; vlast = `[${vo}]`; alast = `[${ao}]`;
+  }
+  const graph = (n > 1 ? (vf + af).replace(/;$/, '') : '[0:v]null[vout];[0:a]anull[aout]') + ';[aout]loudnorm=I=-16:TP=-1.5:LRA=11[aoutn]';
+  fs.writeFileSync(`${work}/graph.txt`, graph);
+  run(`ffmpeg -y -loglevel error ${ins} -i ${base}.srt -filter_complex_script ${work}/graph.txt -map "[vout]" -map "[aoutn]" -map ${n}:s -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -ar 44100 -c:a aac -b:a 160k -c:s mov_text -metadata:s:s:0 language=eng ${base}.mp4`);
   return { id, seconds: t, voiced: voiced > 0, chars, missing };
 }
 
