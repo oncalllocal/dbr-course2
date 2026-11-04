@@ -94,3 +94,12 @@ def contacts_with_tag(tag, page_limit=100):
         batch = res.get("contacts", []); out += batch
         if len(batch) < page_limit: return out
         page += 1
+
+
+def add_note(contact_id, body):
+    return call("POST", f"/contacts/{contact_id}/notes", json={"body": body})
+
+def field_values(contact):
+    """Our audit_* custom fields on a contact as {short_name: value}."""
+    rev = {v: k for k, v in field_ids().items() if v}
+    return {rev[f["id"]]: f.get("value") for f in contact.get("customFields", []) if f.get("id") in rev}

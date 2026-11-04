@@ -1,5 +1,5 @@
 import argparse, sys, csv, datetime, os
-from . import scrape, ghl, lineinfo, enrich, dialer
+from . import scrape, ghl, lineinfo, enrich, dialer, notes
 from .config import *
 
 def cmd_scrape(a):
@@ -66,7 +66,8 @@ def cmd_push(a):
         if lt == "mobile":                       # never auto-dialed; owner calls by hand
             counts["manual"] += 1
             try:
-                ghl.add_task(cid, f'Call (cell) {l["name"]}', f'{l["phone"]} | {l.get("website","")} | {l.get("email","")}', _due_tomorrow_9am())
+                pc = {"companyName": l["name"], "phone": l["phone"], "website": l.get("website"), "email": l.get("email"), "address1": l.get("address"), "tags": ["mce-line-mobile"] + (["mce-24-7"] if l["is_24_7"] else [])}
+                ghl.add_task(cid, f'Call (cell) {l["name"]}', notes.manual_task(pc, {"rating": l.get("rating"), "reviews": l.get("reviews"), "trade": l.get("trade") or l.get("category")}), _due_tomorrow_9am())
                 if stage: ghl.add_opportunity(cid, l["name"], *stage)
             except Exception as e: print("  warn:", str(e)[:160])
             print(f'manual-call {l["name"]} {l["phone"]}')

@@ -13,7 +13,7 @@ Safe by default: nothing is dialed unless you pass --live.
 """
 import os, sys, time, datetime, json, requests
 from zoneinfo import ZoneInfo
-from . import ghl
+from . import ghl, notes
 from .config import *
 
 API = "https://api.twilio.com/2010-04-01/Accounts/{sid}"
@@ -72,19 +72,27 @@ def load_queue(args):
         out.append({"id": c["id"], "name": c.get("companyName") or c.get("contactName"), "phone": c.get("phone"), "tags": tags})
     return out
 
-def record(c, result, call_day):
+def record(c, result, call_day, call=None, tz="America/New_York"):
     cid = c["id"]
     if not cid: return
-    ids = ghl.field_ids(); ghl.call("PUT", f"/contacts/{cid}", json={"customFields": [
-        {"id": ids["outcome"], "field_value": result}, {"id": ids["call_day"], "field_value": call_day}] if ids.get("outcome") else []})
-    if result in ("voicemail", "ringout"):
-        ghl.add_tags(cid, ["mce-" + result])          # permanent marker of how the lead missed us
+    full = ghl.call("GET", f"/contacts/{cid}")["contact"]; fields = ghl.field_values(full)
+    attempt = 2 if TAG_ATTEMPT in c["tags"] else 1
+    prospect = result != "answered" and attempt == 2
+    when = datetime.datetime.now(ZoneInfo(tz))
+    ids = ghl.field_ids(); cf = [{"id": ids[k], "field_value": v} for k, v in
+          (("outcome", result), ("call_day", call_day), ("call_time", when.strftime("%-I:%M %p"))) if ids.get(k)]
+    if cf: ghl.call("PUT", f"/contacts/{cid}", json={"customFields": cf})
+    try: ghl.add_note(cid, notes.call_note(full, fields, result, attempt, call, MESSAGE, tz, prospect))
+    except Exception as e: print("  note warn:", str(e)[:120])
+    if result in ("voicemail", "ringout"): ghl.add_tags(cid, ["mce-" + result])
     if result == "answered":
         ghl.add_tags(cid, [TAG_ANSWERED]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE]})
-    elif TAG_ATTEMPT in c["tags"]:      # second miss -> prospect
+    elif prospect:
         ghl.add_tags(cid, [TAG_NOANSWER]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE, TAG_ATTEMPT]})
+        prev = f"{fields.get('call_day','?')} {fields.get('call_time','')}".strip() + f": {fields.get('outcome','missed')}"
+        history = [prev, f"{when.strftime('%A %-I:%M %p')}: {result}"]
         due = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).strftime("%Y-%m-%dT14:00:00.000Z")
-        ghl.add_task(cid, f"Call {c['name']}: missed our call", f"{c['phone']} - {result} on 2 evenings", due)
+        ghl.add_task(cid, f"Call {c['name']}: missed our after-hours call (2 evenings)", notes.prospect_task(full, fields, history, tz), due)
     else:
         ghl.add_tags(cid, [TAG_ATTEMPT])
 
@@ -113,7 +121,7 @@ def run(args):
         except Exception as e: print("  error:", str(e)[:150]); continue
         stats[res] += 1; print(f"  {c['name']} {c['phone']} -> {res}")
         if res != "answered": misses.append(c["name"])
-        try: record(c, res, f"{now:%A}")
+        try: record(c, res, f"{now:%A}", call, args.tz)
         except Exception as e: print("  ghl warn:", str(e)[:150])
         time.sleep(args.pace)
     print(stats)
