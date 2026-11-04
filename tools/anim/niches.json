@@ -44,7 +44,7 @@
   "cat": "Garage doors",
   "comp": "Another Garage Door Co",
   "job": "a $4,000 full garage door replacement",
-  "cust": "Garage door is stuck open",
-  "reply": "That sounds frustrating. Is the door off its track or not moving at all? What is the address?"
+  "cust": "Garage door just came off the tracks",
+  "reply": "That sounds frustrating. Is the door stuck open or closed? What is the address?"
  }
 }

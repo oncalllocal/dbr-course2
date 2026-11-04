@@ -21,7 +21,7 @@ NICHES = {  # job_stat/job_label: on-screen; job_spoken: narration; job_short: u
                       job_stat="$30,000", job_label="full roof replacement", job_spoken="a thirty thousand dollar roof replacement", job_short="thirty thousand dollar roof replacement", price=30000),
  "water_damage": dict(emergency="has sewage backing up into the basement", short="Sewage is backing up into their basement.", search="search for a water damage restoration company", on_job="in the middle of someone else's emergency",
                       job_stat="$100,000", job_label="Category 3 water loss job", job_spoken="a hundred thousand dollar Category 3 water loss job", job_short="Category 3 water loss job", price=100000),
- "garage_door":  dict(emergency="has a garage door stuck wide open overnight", short="Their garage door is stuck wide open.", search="search for a garage door repair company", on_job="on a ladder in a garage",
+ "garage_door":  dict(emergency="has a garage door that just came off its tracks", short="Their garage door is off its tracks and won't move.", search="search for a garage door repair company", on_job="on a ladder in a garage",
                       job_stat="$4,000", job_label="full garage door replacement", job_spoken="a four thousand dollar garage door replacement", job_short="four thousand dollar garage door replacement", price=4000),
 }
 WORD = {1: "a year", 2: "two years", 3: "three years", 4: "four years", 5: "five years", 6: "six years", 7: "seven years", 8: "eight years", 9: "nine years"}
