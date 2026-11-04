@@ -66,8 +66,8 @@ def slides(n, biz):
       cards=[{"h":"We build it","p":"Everything is set up in your account for you."},{"h":"Keep your number","p":"Your calls forward after a few rings if you don't pick up."},{"h":"You call back","p":"Read the conversation, then call the customer."}],
       narration="The best part is, there's nothing for you to build. We set everything up inside your account. You keep your own phone number. If you don't pick up after a few rings, the call forwards, and the text goes out. All you do is read the conversation, and call them back."))
     S.append(dict(type="bullets", title="Founder pricing", items=["*$497* for your first month","Then *$247* a month","*No contract*, cancel anytime"],
-      note="Founder pricing: $497 first month (includes setup), then $247/month. Text, call and AI usage is billed separately. Pricing may change for future customers.",
-      narration="So what does it cost? Right now, we're offering founder pricing. Four hundred ninety-seven dollars for your first month, then two hundred forty-seven dollars a month after that. No contract, and you can cancel anytime. Text and A I usage is billed separately."))
+      note="Founder pricing: $497 first month (includes setup), then $247/month. Pricing may change for future customers.",
+      narration="So what does it cost? Right now, we're offering founder pricing. Four hundred ninety-seven dollars for your first month, then two hundred forty-seven dollars a month after that. No contract, and you can cancel anytime."))
     S.append(dict(type="stat", big="1 job", label=f"can cover *{pb}* of service",
       note=f"Illustration only. Founder pricing for {m} months totals ${c:,} ($497 + {m-1} x $247); a {n['job_stat']} job exceeds that. Results are not guaranteed.",
       narration=f"And think about the math for a second. One {n['job_short']} covers {pb} of service. And the call that starts it could be the one you miss tonight."))
