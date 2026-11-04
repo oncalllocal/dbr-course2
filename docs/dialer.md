@@ -8,7 +8,7 @@ python3 -m mce dial --from-csv data/x.csv      # dry run against a CSV (never wr
 
 Env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` (voice-capable, E.164), optional `OWNER_PHONE` for the SMS digest.
 
-**Flow:** queue (GHL tag `mce-dial-queue`, set by `mce push --queue`; mobile numbers never get it) -> call inside the window (default Mon-Thu 7:00-7:30 PM Eastern) -> Twilio answering-machine detection (DetectMessageEnd) -> outcome written to GHL.
+**Flow:** queue (GHL tag `mce-dial-queue`, set by `mce push --queue`; mobile numbers never get it) -> call inside the window (default Mon-Thu 7:00-7:45 PM Eastern) -> Twilio answering-machine detection (DetectMessageEnd) -> outcome written to GHL.
 
 | Outcome | Meaning | Result |
 |---|---|---|
