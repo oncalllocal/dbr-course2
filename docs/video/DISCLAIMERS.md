@@ -6,7 +6,7 @@ Not legal advice. Have an attorney review before sending. This lists what the dr
 | Where | Text |
 |---|---|
 | Big-ticket jobs | "Examples of large jobs by trade. Actual job values and outcomes vary." |
-| 38% statistic | Source and sample size line (N, dates). **Must be filled with real numbers before use.** |
+| ~38% statistic | "Approximate. Based on what OnCall Local has found in its own after-hours calls to home service businesses that list 24/7 hours." (owner decision 2026-11-04: no sample size on screen). Keep the underlying call data on file. |
 | Client result | Unnamed client in Northern California, "$83,000+ in sold jobs this year, per the client's records", "One client's result. Results vary and are not guaranteed; they depend on call volume, response speed, pricing and follow-up." |
 | How it works | "The text assistant is an AI and introduces itself as your business's virtual assistant." |
 | Pricing | Founder price and "Pricing may change for future customers." Usage charges are covered on the live call, not in the video (owner decision 2026-11-04). |

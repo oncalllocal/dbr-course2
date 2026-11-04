@@ -43,9 +43,9 @@ def slides(n, biz):
     S.append(dict(type="stat", big=n["job_stat"], label=f"a *{n['job_label']}*, on the other end of one unanswered call",
       note="Example of a large job. Actual job values and outcomes vary.", transition="fade",
       narration=f"Here's what makes that so painful. That call wasn't a two hundred dollar service visit. For a company like yours, it could have been {n['job_spoken']}. And the big jobs don't wait for business hours. They show up at the worst possible time, from people who need an answer right now."))
-    S.append(dict(type="stat", big="38%", label="of calls go *unanswered*, even at businesses that list *24/7 hours*",
-      note="Based on OnCall Local's after-hours calls to home service businesses listing 24/7 hours. Sample: N = ___ calls, ___ to ___. DRAFT: confirm before use.",
-      narration="Now, you might think a twenty-four seven business has this covered. Here's what we've found. Among home service businesses that list their hours as twenty-four seven, thirty-eight percent of calls go unanswered. And that's not because those owners don't care. It's because everyone misses calls. Period."))
+    S.append(dict(type="stat", big="~38%", label="of calls go *unanswered*, even at businesses that list *24/7 hours*",
+      note="Approximate. Based on what OnCall Local has found in its own after-hours calls to home service businesses that list 24/7 hours.",
+      narration="Now, you might think a twenty-four seven business has this covered. Here's what we've found. Among home service businesses that list their hours as twenty-four seven, approximately thirty-eight percent of calls go unanswered. And that's not because those owners don't care. It's because everyone misses calls. Period."))
     S.append(dict(type="cols", title="Why calls get missed",
       cards=[{"h":"On the job","p":"Hands full, phone in the truck."},{"h":"After hours","p":"Dinner, family time, or asleep at two in the morning."},{"h":"Even with a team","p":"Staffed phones still miss calls."}],
       narration=f"Think about your day. You're {n['on_job']}, or in the middle of a job with another customer. Or you're finally sitting down to dinner. Even companies with a team answering the phones around the clock still miss calls. Nobody can pick up every single one. So let's look at what actually happens when a call gets missed."))
