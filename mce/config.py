@@ -47,10 +47,10 @@ MANUAL_PER_DAY = 20
 BIG_JOB = {
     "plumber": "a $12,000 whole-home repipe",
     "hvac contractor": "a $15,000 system replacement",
-    "electrician": "a whole-home generator installation",
-    "roofing contractor": "a full roof replacement",
-    "water damage restoration": "a Category 3 water loss job",
-    "garage door repair": "a full garage door replacement",
+    "electrician": "an $8,000 whole-home generator installation",
+    "roofing contractor": "a $30,000 full roof replacement",
+    "water damage restoration": "a $100,000 Category 3 water loss job",
+    "garage door repair": "a $4,000 full garage door replacement",
 }
 def big_job_for(query):
     """query looks like 'plumber in Tampa FL'."""

@@ -14,7 +14,9 @@ const hl = s => esc(s).replace(/\*(.+?)\*/g, '<em>$1</em>');
 const mime = f => (/\.jpe?g$/i.test(f) ? 'image/jpeg' : /\.webp$/i.test(f) ? 'image/webp' : 'image/png');
 
 function slideHtml(lesson, s, imgPath) {
-  const foot = `<div class="foot">${esc(lesson.id)} · ${esc(lesson.title)}</div><img class="logo" src="${logo}">`;
+  const footText = lesson.footer !== undefined ? lesson.footer : `${lesson.id} · ${lesson.title}`;
+  const note = s.note ? `<div class="note">${esc(s.note)}</div>` : '';
+  const foot = `${note}<div class="foot">${esc(footText)}</div><img class="logo" src="${logo}">`;
   let body = '', cls = '';
   if (s.type === 'title') { cls = 'hero'; body = `<div class="wrap"><h1>${hl(s.title)}</h1><div class="sub">${esc(s.sub || '')}</div></div>`; }
   else if (s.type === 'bullets') body = `<div class="wrap"><h2>${hl(s.title)}</h2><ul>${s.items.map(i => `<li>${hl(i)}</li>`).join('')}</ul></div>`;
