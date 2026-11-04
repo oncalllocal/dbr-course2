@@ -16,7 +16,7 @@ NICHES = {  # job_stat/job_label: on-screen; job_spoken: narration; job_short: u
  "hvac":         dict(emergency="has no air conditioning in ninety-five degree heat", short="It's ninety-five degrees in that house.", search="search for an A C repair company", on_job="in a hot attic",
                       job_stat="$15,000", job_label="HVAC system replacement", job_spoken="a fifteen thousand dollar H V A C system replacement", job_short="fifteen thousand dollar system replacement", price=15000),
  "electrician":  dict(emergency="has half the house without power", short="Half the house is dark.", search="search for an electrician", on_job="up a ladder",
-                      job_stat="$8,000", job_label="whole-home generator installation", job_spoken="an eight thousand dollar whole-home generator installation", job_short="eight thousand dollar generator installation", price=8000),
+                      job_stat="$4,000", job_label="full panel replacement", job_spoken="a four thousand dollar electrical panel replacement", job_short="four thousand dollar panel replacement", price=4000),
  "roofing":      dict(emergency="has rain coming through the roof", short="There's rain coming through their roof.", search="search for a roofer", on_job="up on a roof",
                       job_stat="$30,000", job_label="full roof replacement", job_spoken="a thirty thousand dollar roof replacement", job_short="thirty thousand dollar roof replacement", price=30000),
  "water_damage": dict(emergency="has sewage backing up into the basement", short="Sewage is backing up into their basement.", search="search for a water damage restoration company", on_job="in the middle of someone else's emergency",
