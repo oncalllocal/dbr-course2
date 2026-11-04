@@ -76,7 +76,7 @@ def record(c, result, call_day, call=None, tz="America/New_York"):
     cid = c["id"]
     if not cid: return
     full = ghl.call("GET", f"/contacts/{cid}")["contact"]; fields = ghl.field_values(full)
-    attempt = 2 if TAG_ATTEMPT in c["tags"] else 1
+    attempt = 2 if TAG_ATTEMPT in [t.lower() for t in full.get("tags", [])] else 1   # read the contact directly: the search index can lag
     prospect = result != "answered" and attempt == 2
     when = datetime.datetime.now(ZoneInfo(tz))
     ids = ghl.field_ids(); cf = [{"id": ids[k], "field_value": v} for k, v in
@@ -86,7 +86,7 @@ def record(c, result, call_day, call=None, tz="America/New_York"):
     except Exception as e: print("  note warn:", str(e)[:120])
     if result in ("voicemail", "ringout"): ghl.add_tags(cid, ["mce-" + result])
     if result == "answered":
-        ghl.add_tags(cid, [TAG_ANSWERED]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE]})
+        ghl.add_tags(cid, [TAG_ANSWERED]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE, TAG_ATTEMPT]})
     elif prospect:
         ghl.add_tags(cid, [TAG_NOANSWER]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE, TAG_ATTEMPT]})
         prev = f"{fields.get('call_day','?')} {fields.get('call_time','')}".strip() + f": {fields.get('outcome','missed')}"
