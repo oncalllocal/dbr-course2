@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-11-04):** dialing now runs on Twilio via `python3 -m mce dial` (see `docs/dialer.md`). Only the next-day email workflow (step 6 below) is still built in GHL, triggered by tag `mce-no-answer`.
+
 # GHL workflow: after-hours prospecting call
 
 Build this in the **prospecting sub-account** (the API cannot create workflows).

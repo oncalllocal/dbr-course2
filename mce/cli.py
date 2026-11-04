@@ -1,5 +1,5 @@
 import argparse, sys, csv, datetime, os
-from . import scrape, ghl, lineinfo, enrich
+from . import scrape, ghl, lineinfo, enrich, dialer
 from .config import *
 
 def cmd_scrape(a):
@@ -93,6 +93,13 @@ def main():
     s.add_argument("--allow-unknown", action="store_true", help="auto-dial numbers whose line type is unknown")
     s.add_argument("--skip-tollfree", action="store_true", help="leave toll-free numbers out of the import")
     s.add_argument("--queue", action="store_true", help=f"also add {TAG_QUEUE} (STARTS CALLS if workflow is live)")
+    s = sub.add_parser("dial", help="Twilio after-hours dialer (dry run unless --live)"); s.set_defaults(f=lambda a: dialer.run(a))
+    s.add_argument("--live", action="store_true"); s.add_argument("--limit", type=int, default=25)
+    s.add_argument("--from-csv", help="dry-run/test against a CSV instead of the GHL queue"); s.add_argument("--allow-unknown", action="store_true")
+    s.add_argument("--tz", default="America/New_York"); s.add_argument("--days", default="mon-thu")
+    s.add_argument("--start", default="17:30"); s.add_argument("--end", default="20:30")
+    s.add_argument("--pace", type=int, default=8, help="seconds between calls"); s.add_argument("--sms", action="store_true", help="text a summary to OWNER_PHONE")
+    s.add_argument("--leave-voicemail", action="store_true"); s.add_argument("--ignore-window", action="store_true")
     s = sub.add_parser("results"); s.set_defaults(f=cmd_results); s.add_argument("--out", default="data/results.csv")
     a = p.parse_args(); a.f(a)
 
