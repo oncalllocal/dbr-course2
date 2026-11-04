@@ -64,15 +64,19 @@ def parse(html, query):
         })
     return out
 
+STUFFED = re.compile(r"\b(electricians?|plumbers?|plumbing|hvac|roofers?|roofing|garage door|water damage|restoration)\b.*\b(pros?|experts?|guys|team|services?|near me|tampa|miami)\b|\b(tampa|south tampa|seminole heights|brandon|miami|hialeah)\b.*\b(electricians?|plumbers?|roofers?)\b", re.I)
+
 def score(l, keep_franchises=False):
     n = l["name"].lower()
     if not keep_franchises and any(h in n for h in FRANCHISE_HINTS):
         return None
     s = 0
-    l["is_24_7"] = bool(l["open_24"] or H24_HINTS.search(l["name"]))
+    l["is_24_7"] = bool(l.get("open_24") or l.get("is_24_7") or H24_HINTS.search(l["name"]))
     if l["is_24_7"]: s += 40          # losing the most per missed call
     r = l["reviews"]
     s += 25 if r < 50 else 20 if r < 150 else 10 if r < 400 else 0 if r < 1000 else -10
+    if r < 15: s -= 15                # brand-new or fake-looking listing
+    if STUFFED.search(l["name"]) and r < 100: s -= 15   # keyword-stuffed name with few reviews: often a lead-gen shell
     if l["website"]: s += 5           # we can pull info to train the demo bot
     if (l["rating"] or 0) >= 4.0: s += 5
     return s
@@ -101,4 +105,14 @@ def read_csv(path):
         rows = list(csv.DictReader(f))
     for r in rows:
         r["reviews"] = int(r["reviews"] or 0); r["is_24_7"] = r["is_24_7"] == "True"
+        r["rating"] = float(r["rating"]) if r.get("rating") else None; r["score"] = int(r.get("score") or 0)
     return rows
+
+
+def rescore(leads, keep_franchises=False):
+    out = []
+    for l in leads:
+        sc = score(l, keep_franchises)
+        if sc is None: continue
+        l["score"] = sc; out.append(l)
+    return sorted(out, key=lambda x: -x["score"])

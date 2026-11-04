@@ -27,6 +27,9 @@ def cmd_lookup(a):
     lineinfo.classify_all(leads); _rewrite(a.csv, leads)
     from collections import Counter; print(dict(Counter(l["line_type"] for l in leads)))
 
+def cmd_rescore(a):
+    leads = scrape.rescore(scrape.read_csv(a.csv)); _rewrite(a.csv, leads); print(f"rescored {len(leads)} leads")
+
 def cmd_enrich(a):
     leads = scrape.read_csv(a.csv); n = enrich.enrich_all(leads); _rewrite(a.csv, leads)
     print(f"emails found: {n}/{len(leads)}")
@@ -36,7 +39,9 @@ def _due_tomorrow_9am():
     return datetime.datetime(d.year, d.month, d.day, 14, 0).strftime("%Y-%m-%dT%H:%M:%S.000Z")  # 9 AM Central
 
 def cmd_push(a):
-    leads = scrape.read_csv(a.csv)[: a.limit]
+    leads = scrape.read_csv(a.csv)
+    if a.skip_tollfree: leads = [l for l in leads if l.get("line_type") != "tollfree"]
+    leads = leads[: a.limit]
     extra = [t for t in (a.tags or "").split(",") if t]
     if a.dry_run:
         from collections import Counter
@@ -86,6 +91,7 @@ def main():
     s.add_argument("--lookup", action="store_true", help="classify line type (mobile/landline/voip/tollfree)")
     s.add_argument("--enrich", action="store_true", help="find a public email on each lead's website")
     s = sub.add_parser("lookup"); s.set_defaults(f=cmd_lookup); s.add_argument("csv")
+    s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)
     s.add_argument("csv"); s.add_argument("--limit", type=int, default=50)
