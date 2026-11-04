@@ -116,12 +116,18 @@ def run(args):
     if not all(env.values()): sys.exit("Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER")
     if not open_now and not args.ignore_window: sys.exit("Outside the calling window; nothing dialed (use --ignore-window only for your own test number).")
     stats, misses = {"answered": 0, "voicemail": 0, "ringout": 0}, []
+    today_tag = f"mce-called-{now:%Y%m%d}"
+    before = len(queue); queue = [c for c in queue if today_tag not in c["tags"]]
+    if before != len(queue): print(f"  skipping {before - len(queue)} already called today")
     for c in queue:
         if not in_window(datetime.datetime.now(tz), args.days, args.start, args.end) and not args.ignore_window:
             print("window closed; stopping"); break
         try: res, call = place(c["phone"], env["TWILIO_FROM_NUMBER"], False)
         except Exception as e: print("  error:", str(e)[:150]); continue
         stats[res] += 1; print(f"  {c['name']} {c['phone']} -> {res}")
+        if c["id"]:
+            try: ghl.add_tags(c["id"], [today_tag])
+            except Exception as e: print("  stamp warn:", str(e)[:100])
         if res != "answered": misses.append(c["name"])
         try: record(c, res, f"{now:%A}", call, args.tz)
         except Exception as e: print("  ghl warn:", str(e)[:150])
