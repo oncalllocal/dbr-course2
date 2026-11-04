@@ -52,13 +52,13 @@
    "type": "clip",
    "clip": "clips/missed_call_before.mp4",
    "note": "Illustration only. Not a real customer or call.",
-   "narration": "Here's what happens today. A homeowner searches for a plumber and finds you. They tap call. It rings. Nobody answers. So they go back, tap the next company on the list, and that company picks up. That's the job, gone."
+   "narration": "Here's what happens today. A homeowner searches for a plumber and finds you. They tap call. It rings. Nobody answers. So they go back, tap the next company on the list, and that company picks up. That's the job, gone, before you ever knew it existed."
   },
   {
    "type": "clip",
    "clip": "clips/missed_call_after.mp4",
    "note": "Illustration only. Not a real customer or call.",
-   "narration": "Now the same call, with missed call text back. They tap call. Nobody answers. But before they can tap the next company, a text arrives from your business, asking how it can help. The conversation has started, and you call back first."
+   "narration": "Now the same call, with missed call text back. They tap call. Nobody answers. But just before they tap the next company, a text pops up from your business, asking how it can help. The conversation has started, and you call back first, before anyone else has picked up."
   },
   {
    "type": "stat",

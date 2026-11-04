@@ -1,8 +1,9 @@
 // Renders the before/after missed-call animation to mp4 (frame-exact, 30 fps, 1920x1080).
-// node tools/render_anim.js <before|after> <out.mp4> [--biz "Name"] [--comp "Name"] [--job "a $12,000 repipe"] [--cust "..."] [--reply "..."]
+// node tools/render_anim.js <before|after> <out.mp4> [--niche plumber|hvac|electrician|roofing|water_damage|garage_door] [--biz "Name"] [--comp "Name"] [--job "a $12,000 repipe"] [--cust "..."] [--reply "..."]
 const { chromium } = require('playwright'); const path = require('path'), fs = require('fs'), cp = require('child_process');
 const [mode, out, ...rest] = process.argv.slice(2); const opt = {};
 for (let i = 0; i < rest.length; i += 2) opt[rest[i].replace(/^--/, '')] = rest[i + 1];
+if (opt.niche) { const n = JSON.parse(fs.readFileSync(path.join(__dirname, 'anim/niches.json'), 'utf8'))[opt.niche]; if (!n) { console.error('unknown niche ' + opt.niche); process.exit(2); } for (const k of Object.keys(n)) if (!(k in opt)) opt[k] = n[k]; delete opt.niche; }
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
   const url = 'file://' + path.resolve(__dirname, 'anim/missed_call.html') + '?' + new URLSearchParams({ mode, ...opt });

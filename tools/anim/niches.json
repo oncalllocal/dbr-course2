@@ -1,0 +1,50 @@
+{
+ "plumber": {
+  "q": "emergency plumber near me",
+  "cat": "Plumber",
+  "comp": "Another Plumbing Co",
+  "job": "a $12,000 whole-home repipe",
+  "cust": "Water heater just burst!",
+  "reply": "That sounds stressful. Is the water still running? What is the address?"
+ },
+ "hvac": {
+  "q": "ac repair near me",
+  "cat": "HVAC",
+  "comp": "Another HVAC Co",
+  "job": "a $15,000 system replacement",
+  "cust": "Our AC just died and it is 95 degrees",
+  "reply": "Sorry to hear that. Is the system blowing any air at all? What is the address?"
+ },
+ "electrician": {
+  "q": "emergency electrician near me",
+  "cat": "Electrician",
+  "comp": "Another Electric Co",
+  "job": "an $8,000 whole-home generator installation",
+  "cust": "Half the house just lost power",
+  "reply": "That sounds stressful. Do you see sparks or smell burning? What is the address?"
+ },
+ "roofing": {
+  "q": "roof leak repair near me",
+  "cat": "Roofing",
+  "comp": "Another Roofing Co",
+  "job": "a $30,000 full roof replacement",
+  "cust": "Roof is leaking into the bedroom",
+  "reply": "Sorry to hear that. Where is the water coming in? What is the address?"
+ },
+ "water_damage": {
+  "q": "water damage restoration near me",
+  "cat": "Water damage",
+  "comp": "Another Restoration Co",
+  "job": "a $100,000 Category 3 water loss job",
+  "cust": "Sewage backed up into the basement",
+  "reply": "That sounds awful. Is the water still coming in? What is the address?"
+ },
+ "garage_door": {
+  "q": "garage door repair near me",
+  "cat": "Garage doors",
+  "comp": "Another Garage Door Co",
+  "job": "a $4,000 full garage door replacement",
+  "cust": "Garage door is stuck open",
+  "reply": "That sounds frustrating. Is the door off its track or not moving at all? What is the address?"
+ }
+}
