@@ -71,8 +71,8 @@ def slides(n, biz):
     S.append(dict(type="stat", big="1 job", label=f"can cover *{pb}* of service",
       note=f"Illustration only. Founder pricing for {m} months totals ${c:,} ($497 + {m-1} x $247); a {n['job_stat']} job exceeds that. Results are not guaranteed.",
       narration=f"And think about the math for a second. One {n['job_short']} covers {pb} of service. And the call that starts it could be the one you miss tonight."))
-    S.append(dict(type="title", title="Reply to the email and *say you're in*", sub="We'll get you set up", transition="fadeblack",
-      narration="If this sounds like something you'd want working for you, just reply to the email and say you're in. We'll take it from there. Thanks for watching."))
+    S.append(dict(type="title", title="Reply to the email and *say you're in*", sub="Or reply with any questions. We'll get you set up.", transition="fadeblack",
+      narration="If this sounds like something you'd want working for you, just reply to the email and say you're in. Or, if you have any questions, just reply with those. We'll take it from there. Thanks for watching."))
     return S
 
 QUERY_NICHE = {"plumber": "plumber", "hvac contractor": "hvac", "electrician": "electrician", "roofing contractor": "roofing",
