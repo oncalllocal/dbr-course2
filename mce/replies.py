@@ -61,7 +61,7 @@ def scan(args):
         if kind == "no":
             ghl.add_tags(cid, ["mce-dnc"]); ghl.call("PUT", f"/contacts/{cid}", json={"dndSettings": {"Email": {"status": "active", "message": "Opted out by reply", "code": "101"}}})
         elif kind == "yes":
-            ghl.add_tags(cid, ["mce-interested"]); interested.append(cid)
+            ghl.add_tags(cid, ["mce-interested"]); interested.append(cid); print(f"INTERESTED:{cid}:{name}")
         else:
             ghl.add_tags(cid, ["mce-reply-review"]); ghl.add_task(cid, f"Read reply from {name}", f"Could not tell if this is a yes or a no:\n\n{text}", __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z"))
     return interested
