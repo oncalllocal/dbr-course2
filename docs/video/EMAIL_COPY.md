@@ -25,7 +25,7 @@ There's a simple fix, and it costs far less than a single job. The moment a call
 
 Would you mind if I sent you a short video (under 5 minutes) showing exactly how it works? Just reply "yes" and I'll send it over.
 
-Sam
+Chris
 OnCall Local
 
 ## PARKED: Email 1, version B (third person). Owner chose first person for now (2026-11-04).
@@ -41,7 +41,7 @@ A missed-call text-back system fixes this. When a call goes unanswered, the call
 
 May we send you a short video (under 5 minutes) that shows exactly how it works? Reply "yes" and we will.
 
-Sam
+Chris
 OnCall Local
 
 ---
@@ -56,7 +56,7 @@ It covers what an unanswered after-hours call can cost, how the text-back works,
 
 If it makes sense, just reply to this email and I'll get you set up. If you have questions, reply with those instead.
 
-Sam
+Chris
 OnCall Local
 
 ## Email 3 (bump, 3 days after Email 1 with no reply)
@@ -64,5 +64,5 @@ OnCall Local
 
 Hi again, just checking that my note about our after-hours call reached you. If it's not a priority, no problem. If it is, reply "yes" and I'll send the 5-minute video.
 
-Sam
+Chris
 OnCall Local

@@ -13,7 +13,7 @@ from .config import big_job_for
 
 TAG_SENT = "mce-email-1-sent"
 
-def build(contact, fields, sender="Sam", send_date=None):
+def build(contact, fields, sender="Chris", send_date=None):
     name = contact.get("companyName") or contact.get("contactName") or "your company"
     tm, day, outcome = fields.get("call_time") or "7:00 PM", fields.get("call_day") or "", fields.get("outcome") or ""
     when = "last night"
