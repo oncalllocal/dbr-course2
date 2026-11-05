@@ -42,6 +42,7 @@ def cmd_promote(a):
     due = _next_business_day_9am_utc()
     for c in todo:
         full = ghl.call("GET", f"/contacts/{c['id']}")["contact"]; f = ghl.field_values(full); name = full.get("companyName") or full.get("contactName")
+        if "mce-no-answer" in [t.lower() for t in full.get("tags", [])]: continue      # search index lags; the contact itself is the truth
         hist = [f"{f.get('call_day','?')} {f.get('call_time','')}".strip() + f": {f.get('outcome','missed')}"]
         if a.dry_run: print("  [dry-run]", name, hist[0]); continue
         ghl.add_tags(c["id"], ["mce-no-answer"]); ghl.call("DELETE", f"/contacts/{c['id']}/tags", json={"tags": ["mce-dial-queue", "mce-attempt-1"]})
