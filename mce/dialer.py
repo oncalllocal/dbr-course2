@@ -59,11 +59,14 @@ def next_action(call, in_progress_for):
 def place(to, from_, voicemail=False):
     """Call, wait for answering-machine detection, then speak to a person or hang up on a machine (leaves no voicemail)."""
     env = twilio_env(); base = API.format(sid=env["TWILIO_ACCOUNT_SID"]); auth = (env["TWILIO_ACCOUNT_SID"], env["TWILIO_AUTH_TOKEN"])
-    r = requests.post(f"{base}/Calls.json", auth=auth, timeout=30, data={
-        "To": to, "From": from_, "Twiml": '<Response><Pause length="30"/></Response>', "Timeout": 30,
-        "MachineDetection": "DetectMessageEnd", "MachineDetectionTimeout": 30,
-        "MachineDetectionSpeechThreshold": 4000,      # ms of continuous speech before it counts as a machine (default 2400 catches "Acme Electric, how can I help you?")
-        "MachineDetectionSpeechEndThreshold": 1500, "MachineDetectionSilenceTimeout": 6000})
+    data = {"To": to, "From": from_, "Twiml": '<Response><Pause length="45"/></Response>', "Timeout": 30,
+            "MachineDetection": "DetectMessageEnd", "MachineDetectionTimeout": 30,
+            "MachineDetectionSpeechThreshold": 4000,      # ms of continuous speech before it counts as a machine (default 2400 catches "Acme Electric, how can I help you?")
+            "MachineDetectionSpeechEndThreshold": 1500, "MachineDetectionSilenceTimeout": 6000}
+    r = requests.post(f"{base}/Calls.json", auth=auth, timeout=30, data=data)
+    if r.status_code == 400 and "MachineDetection" in r.text:      # a tuning value was rejected: fall back to Twilio's defaults rather than lose the call
+        for k in ("MachineDetectionSpeechThreshold", "MachineDetectionSpeechEndThreshold", "MachineDetectionSilenceTimeout"): data.pop(k, None)
+        r = requests.post(f"{base}/Calls.json", auth=auth, timeout=30, data=data)
     if r.status_code >= 300: raise RuntimeError(f"Twilio {r.status_code}: {r.text[:200]}")
     sid = r.json()["sid"]; end = time.time() + 120; acted = False; since = None
     while time.time() < end:
