@@ -1,5 +1,5 @@
 import argparse, sys, csv, datetime, os
-from . import scrape, ghl, lineinfo, enrich, dialer, notes, status
+from . import scrape, ghl, lineinfo, enrich, dialer, notes, status, emailer
 from .config import *
 
 def cmd_scrape(a):
@@ -137,6 +137,8 @@ def main():
     s = sub.add_parser("lookup"); s.set_defaults(f=cmd_lookup); s.add_argument("csv")
     s = sub.add_parser("cells-to-pipeline", help="put every mce-cell-manual contact into the Manual Call stage (skips ones already there)"); s.set_defaults(f=cmd_cells)
     s = sub.add_parser("promote-misses", help="make every lead that already missed once a prospect (rule changed to one miss)"); s.set_defaults(f=cmd_promote); s.add_argument("--dry-run", action="store_true")
+    s = sub.add_parser("email", help="Email 1 to prospects (preview unless --live)"); s.set_defaults(f=lambda a: emailer.run(a))
+    s.add_argument("--live", action="store_true"); s.add_argument("--limit", type=int, default=25); s.add_argument("--out", default="data/email_previews"); s.add_argument("--ignore-window", action="store_true")
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)
