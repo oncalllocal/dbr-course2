@@ -18,7 +18,7 @@ from .config import *
 
 API = "https://api.twilio.com/2010-04-01/Accounts/{sid}"
 TERMINAL = {"completed", "busy", "failed", "no-answer", "canceled"}
-MISSES_NEEDED = 2
+MISSES_NEEDED = 1          # misses before a lead becomes a prospect (owner decision 2026-11-04: one miss)
 DAYS = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
 MESSAGE = ("Hi, this is OnCall Local calling to check after-hours phone availability for local service "
            "businesses. No action is needed on your part. Thank you, and have a good evening.")
@@ -78,22 +78,25 @@ def record(c, result, call_day, call=None, tz="America/New_York"):
     if not cid: return
     full = ghl.call("GET", f"/contacts/{cid}")["contact"]; fields = ghl.field_values(full)
     attempt = 2 if TAG_ATTEMPT in [t.lower() for t in full.get("tags", [])] else 1   # read the contact directly: the search index can lag
-    prospect = result != "answered" and attempt == 2
+    prospect = result != "answered" and attempt >= MISSES_NEEDED
     when = datetime.datetime.now(ZoneInfo(tz))
     ids = ghl.field_ids(); cf = [{"id": ids[k], "field_value": v} for k, v in
           (("outcome", result), ("call_day", call_day), ("call_time", when.strftime("%-I:%M %p"))) if ids.get(k)]
     if cf: ghl.call("PUT", f"/contacts/{cid}", json={"customFields": cf})
-    try: ghl.add_note(cid, notes.call_note(full, fields, result, attempt, call, MESSAGE, tz, prospect))
+    try: ghl.add_note(cid, notes.call_note(full, fields, result, attempt, call, MESSAGE, tz, prospect, MISSES_NEEDED))
     except Exception as e: print("  note warn:", str(e)[:120])
     if result in ("voicemail", "ringout"): ghl.add_tags(cid, ["mce-" + result])
     if result == "answered":
         ghl.add_tags(cid, [TAG_ANSWERED]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE, TAG_ATTEMPT]})
     elif prospect:
         ghl.add_tags(cid, [TAG_NOANSWER]); ghl.call("DELETE", f"/contacts/{cid}/tags", json={"tags": [TAG_QUEUE, TAG_ATTEMPT]})
-        prev = f"{fields.get('call_day','?')} {fields.get('call_time','')}".strip() + f": {fields.get('outcome','missed')}"
-        history = [prev, f"{when.strftime('%A %-I:%M %p')}: {result}"]
+        now_line = f"{when.strftime('%A %-I:%M %p')}: {result}"
+        if MISSES_NEEDED > 1:
+            prev = f"{fields.get('call_day','?')} {fields.get('call_time','')}".strip() + f": {fields.get('outcome','missed')}"
+            history = [prev, now_line]
+        else: history = [now_line]
         due = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).strftime("%Y-%m-%dT14:00:00.000Z")
-        ghl.add_task(cid, f"Call {c['name']}: missed our after-hours call (2 evenings)", notes.prospect_task(full, fields, history, tz), due)
+        ghl.add_task(cid, f"Call {c['name']}: missed our after-hours call" + (f" ({len(history)} evenings)" if len(history) > 1 else ""), notes.prospect_task(full, fields, history, tz), due)
         try: print("  pipeline:", ghl.ensure_opportunity(cid, c["name"], STAGE_DNA))
         except Exception as e: print("  pipeline warn:", str(e)[:140])
     else:

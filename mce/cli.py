@@ -36,6 +36,20 @@ def cmd_cells(a):
         if have: print("already in pipeline:", name); continue
         ghl.add_opportunity(c["id"], name, *stage); print("added:", name)
 
+def cmd_promote(a):
+    todo = [c for c in ghl.contacts_with_tag("mce-attempt-1") if "mce-no-answer" not in [t.lower() for t in c.get("tags", [])] and "mce-answered" not in [t.lower() for t in c.get("tags", [])]]
+    print(f"{len(todo)} leads missed once and are not yet prospects")
+    due = _next_business_day_9am_utc()
+    for c in todo:
+        full = ghl.call("GET", f"/contacts/{c['id']}")["contact"]; f = ghl.field_values(full); name = full.get("companyName") or full.get("contactName")
+        hist = [f"{f.get('call_day','?')} {f.get('call_time','')}".strip() + f": {f.get('outcome','missed')}"]
+        if a.dry_run: print("  [dry-run]", name, hist[0]); continue
+        ghl.add_tags(c["id"], ["mce-no-answer"]); ghl.call("DELETE", f"/contacts/{c['id']}/tags", json={"tags": ["mce-dial-queue", "mce-attempt-1"]})
+        ghl.add_task(c["id"], f"Call {name}: missed our after-hours call", notes.prospect_task(full, f, hist, "America/New_York"), due)
+        try: ghl.ensure_opportunity(c["id"], name, "Did not answer")
+        except Exception as e: print("  pipeline warn:", str(e)[:120])
+        ghl.add_note(c["id"], "Promoted to PROSPECT: owner changed the rule to one missed call. " + hist[0]); print("  promoted:", name, hist[0])
+
 def cmd_rescore(a):
     leads = scrape.rescore(scrape.read_csv(a.csv)); _rewrite(a.csv, leads); print(f"rescored {len(leads)} leads")
 
@@ -121,6 +135,7 @@ def main():
     s.add_argument("--enrich", action="store_true", help="find a public email on each lead's website")
     s = sub.add_parser("lookup"); s.set_defaults(f=cmd_lookup); s.add_argument("csv")
     s = sub.add_parser("cells-to-pipeline", help="put every mce-cell-manual contact into the Manual Call stage (skips ones already there)"); s.set_defaults(f=cmd_cells)
+    s = sub.add_parser("promote-misses", help="make every lead that already missed once a prospect (rule changed to one miss)"); s.set_defaults(f=cmd_promote); s.add_argument("--dry-run", action="store_true")
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)

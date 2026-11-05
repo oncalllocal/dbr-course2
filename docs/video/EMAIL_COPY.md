@@ -1,7 +1,7 @@
 # Cold email copy: after-hours audit sequence (DRAFT v1)
 
 Send to the best address found: personal-looking (owner) first, then info/contact/office, then any other. Leads with no email stay on the call-only path.
-Send the morning after the SECOND miss (9:00 AM recipient time, Tue-Fri). Footer on every email: sender name, OnCall Local, physical address, one-click unsubscribe (CAN-SPAM).
+Send the morning after the missed call (one miss makes a prospect) (9:00 AM recipient time, Tue-Fri). Footer on every email: sender name, OnCall Local, physical address, one-click unsubscribe (CAN-SPAM).
 
 Merge fields: `{{contact.company_name}}`, `{{contact.audit_call_day}}`, `{{contact.audit_call_time}}`, and **`{{contact.mctb_big_job}}`** (created in GHL; set by the importer from the trade: plumber = a $12,000 whole-home repipe; HVAC = a $15,000 system replacement; electrician = a $4,000 full panel replacement; roofing = a full roof replacement; water damage = a Category 3 water loss job; garage door = a full garage door replacement. Dollar figures for the last four are not given yet, so the text carries none).
 

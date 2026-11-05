@@ -31,24 +31,26 @@ def business_block(c, fields):
             ("Trade", fields.get("trade")), ("Listed 24/7", "yes" if "mce-24-7" in tags else "no")]
     return "\n".join(f"{k}: {v}" for k, v in rows if v)
 
-def call_note(c, fields, result, attempt, call, message, tz, prospect):
+def call_note(c, fields, result, attempt, call, message, tz, prospect, misses_needed=2):
     status = (call or {}).get("status"); by = (call or {}).get("answered_by") or "n/a"
     detail = f"Twilio status {status}, detected {by}, {(call or {}).get('duration','0')}s, call {(call or {}).get('sid','n/a')}"
     nxt = NEXT["answered"] if result == "answered" else NEXT["prospect"] if prospect else NEXT["attempt1"]
     played = ("Message played to a live answer." if result == "answered" else
               "Message left on voicemail after the beep." if result == "voicemail" else "No one picked up; no message delivered.")
     return (f"MCTB PROSPECTING CALL | {stamp(tz)}\n"
-            f"Disposition: {result.upper()} (attempt {attempt} of 2)\n\n"
+            f"Disposition: {result.upper()}" + (f" (attempt {attempt} of {misses_needed})" if misses_needed > 1 else "") + "\n\n"
             f"Why we called: {WHY}\n\nMessage: \"{message}\"\n{played}\n\nResult detail: {detail}\n\n"
             f"{business_block(c, fields)}\n\nNext step: {nxt}")
 
 def prospect_task(c, fields, history, tz):
-    """history: list of 'Wed 5:42 PM: voicemail' strings (oldest first)."""
+    """history: list of 'Wednesday 7:12 PM: voicemail' strings (oldest first)."""
     name = c.get("companyName") or c.get("contactName")
-    return (f"CALL THIS PROSPECT. They did not answer our after-hours call on two evenings.\n\n{business_block(c, fields)}\n\n"
+    once = len(history) == 1
+    head = ("They did not answer our after-hours call." if once else "They did not answer our after-hours call on two evenings.")
+    when = "last night" if once else "twice this week"
+    return (f"CALL THIS PROSPECT. {head}\n\n{business_block(c, fields)}\n\n"
             f"Call history:\n" + "\n".join(f"- {h}" for h in history) + f"\n\nWhy we called: {WHY}\n\n"
-            f"Suggested opener: \"Hi, this is Sam with OnCall Local. We called {name} "
-            f"after hours twice this week to see how your phones are covered, and nobody picked up. "
+            f"Suggested opener: \"Hi, this is Sam with OnCall Local. We called {name} after hours {when} to see how your phones are covered, and nobody picked up. "
             f"When a customer calls with an emergency after hours, what happens to that call?\"\n\n"
             f"Offer: {PITCH}\n\nAfter the call: set the opportunity stage in Missed Call Prospects and add a note with what they said.")
 

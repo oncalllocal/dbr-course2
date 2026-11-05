@@ -23,7 +23,7 @@ Build this in the **prospecting sub-account** (the API cannot create workflows).
 3. **If/Else on call status:**
    - **Answered** (a live person or answering service picked up): add tag `mce-answered`, set `audit_outcome = answered`, remove tag `mce-dial-queue`. End.
    - **Anything else** (no answer, voicemail, busy, failed): go to step 4.
-4. **Attempt 2 (recommended).** Wait until the next evening's window, repeat the call. Two misses on different nights avoids false positives from one bad moment. Skip this step if you want speed over accuracy.
+4. **(Old two-attempt design, no longer used: one miss now makes a prospect.)** Wait until the next evening's window, repeat the call. Two misses on different nights avoids false positives from one bad moment. Skip this step if you want speed over accuracy.
 5. **If both attempts missed:**
    - Add tag `mce-no-answer`; remove `mce-dial-queue`.
    - Set `audit_outcome` = `voicemail` or `ringout` (if the call action reports it; otherwise `no-answer`).
