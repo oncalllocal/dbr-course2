@@ -13,7 +13,7 @@ Env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` (voice-capa
 | Outcome | Meaning | Result |
 |---|---|---|
 | answered | person or live answering service picked up (or detection unsure) | tag `mce-answered`, removed from queue |
-| voicemail | machine picked up | a miss; the message is left on the voicemail after the beep (detection waits for the greeting to end) |
+| voicemail | machine picked up | a miss; the dialer hangs up as soon as a machine is detected and leaves no message (owner decision 2026-11-04) |
 | ringout | no answer, busy, failed | a miss |
 
 **One miss -> prospect** (owner decision 2026-11-04): tag `mce-no-answer`, a GHL task, a `Did not answer` pipeline card, removed from the queue. `MISSES_NEEDED` in `mce/dialer.py` sets this; at 2 the first miss tags `mce-attempt-1` and keeps the lead queued for the next evening. The next-day email workflow in GHL triggers on `mce-no-answer`.

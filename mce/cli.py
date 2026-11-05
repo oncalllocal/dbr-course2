@@ -51,6 +51,19 @@ def cmd_promote(a):
         except Exception as e: print("  pipeline warn:", str(e)[:120])
         ghl.add_note(c["id"], "Promoted to PROSPECT: owner changed the rule to one missed call. " + hist[0]); print("  promoted:", name, hist[0])
 
+def cmd_find_emails(a):
+    todo = [c for c in ghl.contacts_with_tag(a.tag) if not c.get("email") and c.get("website")]
+    print(f"{len(todo)} contacts with tag {a.tag}, a website and no email")
+    hit = 0
+    for c in todo:
+        name = c.get("companyName") or c.get("contactName"); e, where = enrich.find_email_deep(c["website"])
+        print(f"  {name[:40]:40} {c['website'][:36]:36} -> {e or '(none found)'}")
+        if e:
+            hit += 1
+            if a.write:
+                ghl.call("PUT", f"/contacts/{c['id']}", json={"email": e}); ghl.add_note(c["id"], f"Email found by website search: {e}\nSource page: {where}")
+    print(f"found {hit}/{len(todo)}" + (" (saved to GHL)" if a.write else " (not saved; add --write)"))
+
 def cmd_rescore(a):
     leads = scrape.rescore(scrape.read_csv(a.csv)); _rewrite(a.csv, leads); print(f"rescored {len(leads)} leads")
 
@@ -139,6 +152,8 @@ def main():
     s = sub.add_parser("promote-misses", help="make every lead that already missed once a prospect (rule changed to one miss)"); s.set_defaults(f=cmd_promote); s.add_argument("--dry-run", action="store_true")
     s = sub.add_parser("email", help="Email 1 to prospects (preview unless --live)"); s.set_defaults(f=lambda a: emailer.run(a))
     s.add_argument("--live", action="store_true"); s.add_argument("--limit", type=int, default=25); s.add_argument("--out", default="data/email_previews"); s.add_argument("--ignore-window", action="store_true")
+    s = sub.add_parser("find-emails", help="deeper email search for contacts with a tag and no email"); s.set_defaults(f=cmd_find_emails)
+    s.add_argument("--tag", default="mce-no-answer"); s.add_argument("--write", action="store_true", help="save found emails to the GHL contact")
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)

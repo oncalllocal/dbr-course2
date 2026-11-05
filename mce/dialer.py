@@ -46,18 +46,32 @@ def twiml(leave_voicemail=False):
     # DetectMessageEnd holds this TwiML until the voicemail greeting finishes (after the beep), so the whole message is recorded.
     return f'<Response><Pause length="1"/><Say voice="Polly.Joanna-Neural">{MESSAGE}</Say><Hangup/></Response>'
 
-def place(to, from_, voicemail):
+def next_action(call, in_progress_for):
+    """What to do with a live call. 'hangup' on a machine, 'play' for a person (or if detection is slow), else 'wait'."""
+    ab = call.get("answered_by")
+    if call.get("status") != "in-progress": return "wait"
+    if ab and (ab.startswith("machine") or ab == "fax"): return "hangup"
+    if ab: return "play"                       # human or unknown: tell them, as before
+    return "play" if in_progress_for >= 10 else "wait"   # no result after 10 s: do not leave them in silence
+
+def place(to, from_, voicemail=False):
+    """Call, wait for answering-machine detection, then speak to a person or hang up on a machine (leaves no voicemail)."""
     env = twilio_env(); base = API.format(sid=env["TWILIO_ACCOUNT_SID"]); auth = (env["TWILIO_ACCOUNT_SID"], env["TWILIO_AUTH_TOKEN"])
     r = requests.post(f"{base}/Calls.json", auth=auth, timeout=30, data={
-        "To": to, "From": from_, "Twiml": twiml(voicemail), "Timeout": 30,
-        "MachineDetection": "DetectMessageEnd", "MachineDetectionTimeout": 30})
+        "To": to, "From": from_, "Twiml": '<Response><Pause length="30"/></Response>', "Timeout": 30,
+        "MachineDetection": "Enable", "MachineDetectionTimeout": 8})
     if r.status_code >= 300: raise RuntimeError(f"Twilio {r.status_code}: {r.text[:200]}")
-    sid = r.json()["sid"]; end = time.time() + 120
+    sid = r.json()["sid"]; end = time.time() + 120; acted = False; since = None
     while time.time() < end:
         c = requests.get(f"{base}/Calls/{sid}.json", auth=auth, timeout=30).json()
         if c["status"] in TERMINAL:
             return outcome(c["status"], c.get("answered_by")), c
-        time.sleep(3)
+        if c["status"] == "in-progress" and since is None: since = time.time()
+        if not acted:
+            act = next_action(c, (time.time() - since) if since else 0)
+            if act == "hangup": requests.post(f"{base}/Calls/{sid}.json", auth=auth, data={"Status": "completed"}, timeout=30); acted = True
+            elif act == "play": requests.post(f"{base}/Calls/{sid}.json", auth=auth, data={"Twiml": twiml()}, timeout=30); acted = True
+        time.sleep(1)
     return "ringout", {"status": "timeout"}
 
 def load_queue(args):

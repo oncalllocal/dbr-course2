@@ -36,7 +36,7 @@ def call_note(c, fields, result, attempt, call, message, tz, prospect, misses_ne
     detail = f"Twilio status {status}, detected {by}, {(call or {}).get('duration','0')}s, call {(call or {}).get('sid','n/a')}"
     nxt = NEXT["answered"] if result == "answered" else NEXT["prospect"] if prospect else NEXT["attempt1"]
     played = ("Message played to a live answer." if result == "answered" else
-              "Message left on voicemail after the beep." if result == "voicemail" else "No one picked up; no message delivered.")
+              "Hung up on the voicemail; no message was left." if result == "voicemail" else "No one picked up; no message delivered.")
     return (f"MCTB PROSPECTING CALL | {stamp(tz)}\n"
             f"Disposition: {result.upper()}" + (f" (attempt {attempt} of {misses_needed})" if misses_needed > 1 else "") + "\n\n"
             f"Why we called: {WHY}\n\nMessage: \"{message}\"\n{played}\n\nResult detail: {detail}\n\n"
