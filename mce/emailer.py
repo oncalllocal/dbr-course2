@@ -12,6 +12,8 @@ from . import ghl
 from .config import big_job_for
 
 TAG_SENT = "mce-email-1-sent"
+DEFAULT_FROM = "Chris at OnCall Local <chris@missedcalls.on-calllocal.com>"      # approved after test 2 (matches the sending subdomain, no "on behalf of")
+DEFAULT_POSTAL = "450 Century Pkwy Ste 250, Allen, TX, 75013"
 
 def build(contact, fields, sender="Chris", send_date=None):
     name = contact.get("companyName") or contact.get("contactName") or "your company"
@@ -29,7 +31,7 @@ def build(contact, fields, sender="Chris", send_date=None):
       'Would you mind if I sent you a short video (under 5 minutes) showing exactly how it works? Just reply "yes" and I\'ll send it over.',
       f"{sender}<br>OnCall Local",
     ]
-    addr = os.environ.get("POSTAL_ADDRESS", "[POSTAL ADDRESS NOT SET]")
+    addr = os.environ.get("POSTAL_ADDRESS", DEFAULT_POSTAL)
     foot = f"OnCall Local &middot; {H.escape(addr)}<br>Not interested? Just reply &quot;no thanks&quot; and we won't email you again."
     html = "".join(f"<p>{p if '<br>' in p else H.escape(p)}</p>" for p in paras) + f'<p style="color:#6b7b8a;font-size:12px">{foot}</p>'
     text = "\n\n".join(re.sub(r"<br>", "\n", p) for p in paras) + "\n\n" + re.sub(r"&middot;", "-", re.sub(r"&quot;", '"', re.sub(r"<br>", "\n", foot)))
@@ -47,9 +49,8 @@ def run(args):
     now = datetime.datetime.now(ZoneInfo("America/New_York"))
     todo = [c for c in ghl.contacts_with_tag("mce-no-answer") if eligible(c)][: args.limit]
     print(f"{now:%a %H:%M %Z}; send window Mon-Fri 9-11 AM ET: {'OPEN' if in_send_window(now) else 'CLOSED'}; {len(todo)} eligible prospects")
-    os.makedirs(args.out, exist_ok=True); sender = os.environ.get("EMAIL_FROM")
+    os.makedirs(args.out, exist_ok=True); sender = os.environ.get("EMAIL_FROM", DEFAULT_FROM)
     if args.live:
-        if not sender or not os.environ.get("POSTAL_ADDRESS"): raise SystemExit("Set EMAIL_FROM (e.g. 'Sam at OnCall Local <sam@yourdomain>') and POSTAL_ADDRESS before sending.")
         if not in_send_window(now) and not args.ignore_window: raise SystemExit("Outside the send window; nothing sent.")
     sent = 0
     for c in todo:
