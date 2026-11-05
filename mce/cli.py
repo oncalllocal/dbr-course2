@@ -1,5 +1,5 @@
 import argparse, sys, csv, datetime, os
-from . import scrape, ghl, lineinfo, enrich, dialer, notes, status, emailer
+from . import scrape, ghl, lineinfo, enrich, dialer, notes, status, emailer, replies, draft
 from .config import *
 
 def cmd_scrape(a):
@@ -154,6 +154,12 @@ def main():
     s.add_argument("--live", action="store_true"); s.add_argument("--limit", type=int, default=25); s.add_argument("--out", default="data/email_previews"); s.add_argument("--ignore-window", action="store_true")
     s = sub.add_parser("find-emails", help="deeper email search for contacts with a tag and no email"); s.set_defaults(f=cmd_find_emails)
     s.add_argument("--tag", default="mce-no-answer"); s.add_argument("--write", action="store_true", help="save found emails to the GHL contact")
+    s = sub.add_parser("replies", help="find and classify replies to Email 1 (dry run unless --act)"); s.set_defaults(f=lambda a: replies.scan(a))
+    s.add_argument("--act", action="store_true"); s.add_argument("--contact")
+    s = sub.add_parser("draft", help="build the video + Email 2 as a REVIEW draft (never sends)"); s.set_defaults(f=lambda a: draft.draft(a))
+    s.add_argument("--contact", required=True); s.add_argument("--skip-build", action="store_true"); s.add_argument("--force", action="store_true")
+    s = sub.add_parser("send-video", help="send the saved Email 2 (only after the owner approves)"); s.set_defaults(f=lambda a: draft.send_video(a))
+    s.add_argument("--contact", required=True); s.add_argument("--force", action="store_true")
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)
