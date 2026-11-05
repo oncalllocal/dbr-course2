@@ -47,19 +47,23 @@ def twiml(leave_voicemail=False):
     return f'<Response><Pause length="1"/><Say voice="Polly.Joanna-Neural">{MESSAGE}</Say><Hangup/></Response>'
 
 def next_action(call, in_progress_for):
-    """What to do with a live call. 'hangup' on a machine, 'play' for a person (or if detection is slow), else 'wait'."""
+    """What to do with a live call. Hang up ONLY on strong machine evidence: a greeting that ran long and then ended (machine_end_*)
+    or a fax. Anything a person could be (human, unknown, or no result yet after 40 s) hears the message."""
     ab = call.get("answered_by")
     if call.get("status") != "in-progress": return "wait"
-    if ab and (ab.startswith("machine") or ab == "fax"): return "hangup"
-    if ab: return "play"                       # human or unknown: tell them, as before
-    return "play" if in_progress_for >= 10 else "wait"   # no result after 10 s: do not leave them in silence
+    if ab and (ab.startswith("machine_end") or ab == "fax"): return "hangup"
+    if ab and ab.startswith("machine_start"): return "wait"          # early guess: wait for the greeting to finish
+    if ab: return "play"                                               # human or unknown
+    return "play" if in_progress_for >= 40 else "wait"
 
 def place(to, from_, voicemail=False):
     """Call, wait for answering-machine detection, then speak to a person or hang up on a machine (leaves no voicemail)."""
     env = twilio_env(); base = API.format(sid=env["TWILIO_ACCOUNT_SID"]); auth = (env["TWILIO_ACCOUNT_SID"], env["TWILIO_AUTH_TOKEN"])
     r = requests.post(f"{base}/Calls.json", auth=auth, timeout=30, data={
         "To": to, "From": from_, "Twiml": '<Response><Pause length="30"/></Response>', "Timeout": 30,
-        "MachineDetection": "Enable", "MachineDetectionTimeout": 8})
+        "MachineDetection": "DetectMessageEnd", "MachineDetectionTimeout": 30,
+        "MachineDetectionSpeechThreshold": 4000,      # ms of continuous speech before it counts as a machine (default 2400 catches "Acme Electric, how can I help you?")
+        "MachineDetectionSpeechEndThreshold": 1500, "MachineDetectionSilenceTimeout": 6000})
     if r.status_code >= 300: raise RuntimeError(f"Twilio {r.status_code}: {r.text[:200]}")
     sid = r.json()["sid"]; end = time.time() + 120; acted = False; since = None
     while time.time() < end:
