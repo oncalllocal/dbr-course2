@@ -1,5 +1,5 @@
 import argparse, sys, csv, datetime, os
-from . import scrape, ghl, lineinfo, enrich, dialer, notes, status, emailer, replies, draft
+from . import scrape, ghl, lineinfo, enrich, dialer, notes, status, emailer, replies, draft, owners
 from .config import *
 
 def cmd_scrape(a):
@@ -160,6 +160,7 @@ def main():
     s.add_argument("--contact", required=True); s.add_argument("--skip-build", action="store_true"); s.add_argument("--force", action="store_true")
     s = sub.add_parser("send-video", help="send the saved Email 2 (only after the owner approves)"); s.set_defaults(f=lambda a: draft.send_video(a))
     s.add_argument("--contact", required=True); s.add_argument("--force", action="store_true")
+    s = sub.add_parser("owners-apply", help="store researched owners in GHL (dry run unless --act)"); s.set_defaults(f=lambda a: owners.apply(a.file, a.act)); s.add_argument("--file", default="data/owner_pilot.json"); s.add_argument("--act", action="store_true")
     s = sub.add_parser("rescore"); s.set_defaults(f=cmd_rescore); s.add_argument("csv")
     s = sub.add_parser("enrich"); s.set_defaults(f=cmd_enrich); s.add_argument("csv")
     s = sub.add_parser("push"); s.set_defaults(f=cmd_push)

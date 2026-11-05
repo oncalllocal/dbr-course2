@@ -19,14 +19,15 @@ def upload(path, name):
     if r.status_code >= 300: raise RuntimeError(f"media upload {r.status_code}: {r.text[:200]}")
     return r.json()["url"]
 
-def body(url):
-    paras = ["Hi there,", "Thanks for saying yes. Here's the video (under 5 minutes):", f'<a href="{H.escape(url)}">{H.escape(url)}</a>',
+def body(url, first=None):
+    greet = f"Hi {first}," if first else "Hi there,"
+    paras = [greet, "Thanks for saying yes. Here's the video (under 5 minutes):", f'<a href="{H.escape(url)}">{H.escape(url)}</a>',
              "It covers what an unanswered after-hours call can cost, how the text-back works, and founder pricing: $497 for the first month, then $247 a month, no contract.",
              "If it makes sense, just reply to this email and I'll get you set up. If you have questions, reply with those instead.", "Chris<br>OnCall Local"]
     addr = os.environ.get("POSTAL_ADDRESS", emailer.DEFAULT_POSTAL)
     foot = f'<p style="color:#6b7b8a;font-size:12px">OnCall Local &middot; {H.escape(addr)}<br>Not interested? Just reply "no thanks" and we won\'t email you again.</p>'
     html = "".join(f"<p>{p}</p>" if p.startswith("<a") or "<br>" in p else f"<p>{H.escape(p)}</p>" for p in paras) + foot
-    text = f"Hi there,\n\nThanks for saying yes. Here's the video (under 5 minutes):\n\n{url}\n\nIt covers what an unanswered after-hours call can cost, how the text-back works, and founder pricing: $497 for the first month, then $247 a month, no contract.\n\nIf it makes sense, just reply to this email and I'll get you set up. If you have questions, reply with those instead.\n\nChris\nOnCall Local"
+    text = f"{greet}\n\nThanks for saying yes. Here's the video (under 5 minutes):\n\n{url}\n\nIt covers what an unanswered after-hours call can cost, how the text-back works, and founder pricing: $497 for the first month, then $247 a month, no contract.\n\nIf it makes sense, just reply to this email and I'll get you set up. If you have questions, reply with those instead.\n\nChris\nOnCall Local"
     return html, text
 
 def draft(args):
@@ -38,7 +39,7 @@ def draft(args):
         print(f"building the video for {name} (about 6 minutes)...")
         subprocess.check_call(["python3", f"{ROOT}/tools/build_vsl.py", "--contact", args.contact], cwd=ROOT)
     if not os.path.exists(mp4): raise SystemExit(f"video not found: {mp4}")
-    url = upload(mp4, f"{slug}.mp4"); html, text = body(url)
+    url = upload(mp4, f"{slug}.mp4"); html, text = body(url, ghl.field_values(c).get("owner_first"))
     ghl.add_note(args.contact, f"{MARK}\nTo: {c.get('email') or '(no email on file)'}\nSubject: {SUBJECT}\nVIDEO: {url}\n\n{text}")
     ghl.add_task(args.contact, f"REVIEW & SEND video + email: {name}", f"Their reply said yes. A personalized video and Email 2 are ready as a DRAFT. NOTHING has been sent.\n\nVideo: {url}\n\nTo: {c.get('email') or '(no email on file)'}\nSubject: {SUBJECT}\n\n{text}\n\nWhen you approve, tell Claude to send it.",
                  datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z"))
@@ -55,6 +56,6 @@ def send_video(args):
     if not n: raise SystemExit("no saved draft found for this contact")
     if "mce-video-sent" in {t.lower() for t in c.get("tags", [])} and not args.force: raise SystemExit("already sent")
     if not c.get("email"): raise SystemExit("this contact has no email on file")
-    url = re.search(r"VIDEO: (\\S+)", n["body"]).group(1); html, text = body(url)
+    url = re.search(r"VIDEO: (\\S+)", n["body"]).group(1); html, text = body(url, ghl.field_values(c).get("owner_first"))
     ghl.call("POST", "/conversations/messages", json={"type": "Email", "contactId": args.contact, "subject": SUBJECT, "html": html, "emailFrom": os.environ.get("EMAIL_FROM", emailer.DEFAULT_FROM)})
     ghl.add_tags(args.contact, ["mce-video-sent"]); ghl.add_note(args.contact, f"EMAIL 2 SENT (video)\nVIDEO: {url}"); print(f"sent Email 2 to {name} <{c['email']}>")

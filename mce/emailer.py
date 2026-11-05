@@ -22,7 +22,7 @@ def build(contact, fields, sender="Chris", send_date=None):
     job = big_job_for(fields.get("source_query")) or fields.get("big_job") or "a big job"
     subject = f"No one picked up at {tm}"
     paras = [
-      "Hi there,",
+      f"Hi {fields.get('owner_first')}," if fields.get("owner_first") else "Hi there,",
       f"We called {name} {when} at {tm} as part of an after-hours phone audit we're running for local service companies. Nobody picked up.",
       "I'm not writing to scold you. I'm writing because of what that call could have been.",
       f"If that had been a real customer, ready to book {job}, they wouldn't have waited for a callback. They would have hung up and called the next company on Google. And you would never have known the call happened.",

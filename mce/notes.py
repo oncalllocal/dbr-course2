@@ -28,7 +28,7 @@ def business_block(c, fields):
     rows = [("Business", c.get("companyName") or c.get("contactName")), ("Phone", f"{c.get('phone')} ({line})"),
             ("Website", c.get("website")), ("Email", c.get("email") or "none found"), ("Address", addr),
             ("Google", f"{fields.get('rating','?')} stars, {fields.get('reviews','?')} reviews"),
-            ("Trade", fields.get("trade")), ("Listed 24/7", "yes" if "mce-24-7" in tags else "no")]
+            ("Trade", fields.get("trade")), ("Listed 24/7", "yes" if "mce-24-7" in tags else "no"), ("Owner (confirm when you call)", fields.get("owner"))]
     return "\n".join(f"{k}: {v}" for k, v in rows if v)
 
 def call_note(c, fields, result, attempt, call, message, tz, prospect, misses_needed=2):

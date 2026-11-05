@@ -22,6 +22,8 @@ TAG_24_7      = "mce-24-7"
 
 # Existing custom fields in the sub-account (looked up by fieldKey at runtime).
 FIELD_KEYS = {
+    "owner":        "contact.mctb_owner",
+    "owner_first":  "contact.mctb_owner_first_name",
     "big_job":      "contact.mctb_big_job",
     "score":        "contact.mctb_lead_score",
     "source_query": "contact.audit_source_query",

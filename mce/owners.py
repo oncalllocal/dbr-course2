@@ -84,3 +84,54 @@ def research(contact):
     try: out["facebook"] = facebook(name)
     except Exception as e: out["facebook"] = {"error": str(e)[:80]}
     return out
+
+
+# ---------- turn pilot results into stored owner info (confident names only ever reach a greeting) ----------
+HIGH_TITLES = {"P", "PD", "P/D", "PRES", "PRESIDENT", "MGR", "MGRM", "AMBR", "AMBR MGR", "CEO", "OWNER", "D"}
+
+def _clean_name(n):
+    toks = n.split()
+    ok = len(toks) >= 2 and all(re.fullmatch(r"[A-Za-z][a-z'\-]{2,}|[A-Z]\.?", t) for t in toks)
+    return ok
+
+def decide(r):
+    """From one pilot record: (confidence, full name, first name, evidence) or None."""
+    best = None
+    for e in r.get("sunbiz", []):
+        if not e.get("people") or norm(e["entity"]) != norm(r["name"]): continue      # the registry entity's name must equal the business name
+        p = e["people"][0]
+        conf = "high" if (e.get("street_match") and _clean_name(p["name"]) and p["title"].replace(" ", "").upper() in {t.replace(" ", "") for t in HIGH_TITLES}) else ("medium" if e.get("bay_area") or e.get("street_match") else "low")
+        rank = {"high": 3, "medium": 2, "low": 1}[conf]
+        if best is None or rank > best[0]:
+            names = "; ".join(f"{q['name']} ({q['title']})" for q in e["people"][:2])
+            best = (rank, conf, p["name"], p["name"].split()[0], f"{names}, {e['entity'].title()}; Florida business registry" + ("; address matched" if e.get("street_match") else "; address NOT matched"))
+    if not best or best[1] == "low": return None
+    return best[1:]
+
+
+def apply(path, act=False):
+    """Store the researched owners in GHL. High confidence: also the contact's name and the greeting name. Medium: a note and the 'to confirm' field only."""
+    import json, datetime
+    from . import ghl, notes as N
+    R = json.load(open(path)); ids = ghl.field_ids()
+    by_name = {(c.get("companyName") or c.get("contactName")): c for c in ghl.contacts_with_tag("mce-no-answer")}
+    for r in R:
+        d = decide(r)
+        if not d: continue
+        conf, name, first, ev = d; c = by_name.get(r["name"])
+        if not c: continue
+        cid = c["id"]; last = " ".join(t for t in name.split()[1:] if not re.fullmatch(r"[A-Z]\.?", t)) or name.split()[-1]
+        print(f"{r['name'][:36]:36} {conf.upper():7} {name}" + ("  -> contact name + greeting" if conf == "high" else "  -> note + 'to confirm' field only"))
+        if not act: continue
+        cf = [{"id": ids["owner"], "field_value": f"{name} ({conf} confidence{'' if conf == 'high' else ', confirm when you call'}): {ev}"}]
+        if conf == "high": cf.append({"id": ids["owner_first"], "field_value": first})
+        body = {"customFields": cf}
+        if conf == "high": body.update(firstName=first, lastName=last)
+        ghl.call("PUT", f"/contacts/{cid}", json=body); ghl.add_tags(cid, [f"mce-owner-{conf}"])
+        ghl.add_note(cid, f"OWNER RESEARCH ({conf} confidence)\n{name}\nSource: {ev}\nConfirm the name when you call; never assume it is right.")
+        full = ghl.call("GET", f"/contacts/{cid}")["contact"]; f = ghl.field_values(full)
+        for t in ghl.call("GET", f"/contacts/{cid}/tasks").get("tasks", []):
+            if t["title"].startswith("Call ") and "missed our after-hours call" in t["title"]:
+                hist = [f"{f.get('call_day','?')} {f.get('call_time','')}".strip() + f": {f.get('outcome','missed')}"]
+                ghl.call("PUT", f"/contacts/{cid}/tasks/{t['id']}", json={"title": t["title"], "body": N.prospect_task(full, f, hist, "America/New_York"), "dueDate": t["dueDate"], "completed": t.get("completed", False)})
+                print("    task updated")
