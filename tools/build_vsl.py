@@ -96,6 +96,18 @@ def from_lead(phone, csv_path):
     except Exception as e: print("note: could not read the call time from GHL:", str(e)[:100])
     return info
 
+def from_contact(contact_id):
+    """Real lead data straight from GHL (no local CSV needed): name, trade, rating, reviews, hours, email, call day/time."""
+    sys.path.insert(0, ROOT)
+    from mce import ghl
+    c = ghl.call("GET", f"/contacts/{contact_id}")["contact"]; f = ghl.field_values(c)
+    niche = QUERY_NICHE.get((f.get("source_query") or "").split(" in ")[0].strip().lower())
+    if not niche: sys.exit(f"no video template for trade '{f.get('source_query')}'")
+    tags = {t.lower() for t in c.get("tags", [])}
+    return dict(niche=niche, biz=c.get("companyName") or c.get("contactName"), rating=f.get("rating"), reviews=f.get("reviews"),
+                hours="Open 24 hours" if "mce-24-7" in tags else "", email=c.get("email") or "", website=c.get("website") or "",
+                call_day=f.get("call_day"), call_time=f.get("call_time"))
+
 def merged_emails(info, niche):
     """Email 1 and Email 2 with this lead's real data merged in. Preview only; nothing is sent."""
     sys.path.insert(0, ROOT)
@@ -138,13 +150,16 @@ OnCall Local
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--niche", choices=sorted(NICHES)); ap.add_argument("--biz"); ap.add_argument("--slug")
-    ap.add_argument("--phone", help="build from a real lead: its E.164 phone in the CSV"); ap.add_argument("--csv", default="data/tampa_batch1.csv")
+    ap.add_argument("--phone", help="build from a real lead: its E.164 phone in the CSV"); ap.add_argument("--contact", help="build from a GHL contact id (no CSV needed)"); ap.add_argument("--csv", default="data/tampa_batch1.csv")
     ap.add_argument("--rating"); ap.add_argument("--reviews"); ap.add_argument("--hours"); ap.add_argument("--skip-render", action="store_true"); ap.add_argument("--md")
     a = ap.parse_args(); info = None
-    if a.phone:
+    if a.contact:
+        info = from_contact(a.contact); a.niche = a.niche or info["niche"]; a.biz = a.biz or info["biz"]; a.rating = a.rating or info["rating"]; a.reviews = a.reviews or info["reviews"]; a.hours = a.hours if a.hours is not None else info["hours"]
+        a.slug = a.slug or "".join(ch if ch.isalnum() else "_" for ch in a.biz.lower()).strip("_")
+    elif a.phone:
         info = from_lead(a.phone, a.csv); a.niche = a.niche or info["niche"]; a.biz = a.biz or info["biz"]; a.rating = a.rating or info["rating"]; a.reviews = a.reviews or info["reviews"]; a.hours = a.hours if a.hours is not None else info["hours"]
         a.slug = a.slug or "".join(ch if ch.isalnum() else "_" for ch in a.biz.lower()).strip("_")
-    if not (a.niche and a.biz and a.slug): ap.error("give --phone, or all of --niche --biz --slug")
+    if not (a.niche and a.biz and a.slug): ap.error("give --contact or --phone, or all of --niche --biz --slug")
     n = NICHES[a.niche]
     os.makedirs(f"{ROOT}/lessons/gen", exist_ok=True); os.makedirs(f"{ROOT}/lessons/clips/gen", exist_ok=True)
     before, after = f"clips/gen/{a.slug}_before.mp4", f"clips/gen/{a.slug}_after.mp4"

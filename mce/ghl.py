@@ -26,6 +26,8 @@ def field_ids():
     return _field_ids
 
 def upsert_lead(l, extra_tags=()):
+    """Create or update a lead. IMPORTANT: GHL's upsert REPLACES tags, so tags are never sent in the upsert; they are added afterwards
+    (the add-tags call merges). Returns (contact id, is_new, all tags the contact now has)."""
     ids = field_ids()
     vals = {"source_query": l["query"], "reviews": l["reviews"], "rating": l["rating"],
             "trade": l.get("trade") or l["category"], "score": l.get("score"), "big_job": big_job_for(l.get("query"))}
@@ -37,12 +39,14 @@ def upsert_lead(l, extra_tags=()):
     body = {
         "locationId": ghl_location(), "name": l["name"], "companyName": l["name"],
         "phone": l["phone"], "email": l.get("email") or None, "website": l["website"] or None, "address1": l["address"] or None,
-        "source": "mce-maps-scrape", "tags": tags,
-        "customFields": [{"id": ids[k], "field_value": str(v)} for k, v in vals.items()
-                         if ids.get(k) and v not in (None, "")],
+        "source": "mce-maps-scrape",
+        "customFields": [{"id": ids[k], "field_value": str(v)} for k, v in vals.items() if ids.get(k) and v not in (None, "")],
     }
     res = call("POST", "/contacts/upsert", json=body)
-    return res["contact"]["id"], res.get("new", None), [t.lower() for t in res["contact"].get("tags", [])]
+    cid = res["contact"]["id"]
+    before = [t.lower() for t in res["contact"].get("tags", [])]      # what the contact already had (upsert without tags leaves them alone)
+    add_tags(cid, tags)
+    return cid, res.get("new", None), sorted(set(before) | {t.lower() for t in tags})
 
 def add_tags(contact_id, tags):
     return call("POST", f"/contacts/{contact_id}/tags", json={"tags": list(tags)})
