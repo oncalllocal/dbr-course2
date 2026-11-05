@@ -1,30 +1,24 @@
 name: MCTB dialer
-
-# SWITCHED OFF until tomorrow: manual runs only. After the first scheduled-session run is verified:
-#   1) add the secrets listed in docs/ACTIONS_SETUP.md
-#   2) run it once by hand with live=false (dry run) and check the log
-#   3) uncomment the schedule below and disable the Claude scheduled task, so only ONE dialer runs
+# Scheduled runs happen only when the repo variable MCTB_ACTIONS_LIVE = true. Manual runs always work (live=false is a dry run).
 on:
   workflow_dispatch:
     inputs:
       live:
         description: "Dial for real? (false = dry run that only prints the plan)"
         default: "false"
-  # schedule:
-  #   - cron: "5 23 * * 1-4"   # 7:05 PM Eastern during daylight time
-  #   - cron: "5 0 * * 2-5"    # 7:05 PM Eastern during standard time (the dialer's own window check decides which one may dial)
-
+  schedule:
+    - cron: "45 22 * * 1-4"   # 6:45 PM Eastern in daylight time
+    - cron: "45 23 * * 1-4"   # 6:45 PM Eastern in standard time (the other one finds the window too far away and exits)
 concurrency:
   group: mctb-dialer
   cancel-in-progress: false
-
 permissions:
   contents: read
-
 jobs:
   dial:
+    if: github.event_name == 'workflow_dispatch' || vars.MCTB_ACTIONS_LIVE == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       GHL_TOKEN: ${{ secrets.GHL_TOKEN }}
       GHL_LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
@@ -36,14 +30,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - run: pip install -r requirements.txt
       - name: Dial
         run: |
-          if [ "${{ github.event.inputs.live }}" = "true" ]; then
-            python -m mce dial --live --limit 60
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.live }}" = "true" ]; then
+            python -m mce dial --live --limit 80 --wait-minutes 30
           else
-            python -m mce dial --limit 60
+            python -m mce dial --limit 80
           fi
       - name: Status after the run
         if: always()
-        run: python -m mce status
+        run: python -m mce status || true

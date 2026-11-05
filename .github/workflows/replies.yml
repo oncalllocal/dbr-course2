@@ -1,0 +1,67 @@
+name: MCTB replies and drafts
+# Reads replies to Email 1; for each clear "yes" builds the personalized video + Email 2 as a REVIEW draft. Never sends to a prospect.
+# Triggered by a GHL workflow (a webhook that calls this workflow's dispatch API) or by hand. A backup schedule runs only when MCTB_ACTIONS_LIVE = true.
+on:
+  workflow_dispatch:
+    inputs:
+      contact_id:
+        description: "GHL contact id of the prospect who replied (leave blank to scan every prospect)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "17 14-22 * * 1-5"   # backup: hourly, weekdays, in case a trigger is missed
+concurrency:
+  group: mctb-replies
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  replies:
+    if: github.event_name == 'workflow_dispatch' || vars.MCTB_ACTIONS_LIVE == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GHL_TOKEN: ${{ secrets.GHL_TOKEN }}
+      GHL_LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      SCRAPINGBEE_API_KEY: ${{ secrets.SCRAPINGBEE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Check for replies
+        id: scan
+        run: |
+          set -o pipefail
+          if [ -n "${{ github.event.inputs.contact_id }}" ]; then
+            python -m mce replies --act --contact "${{ github.event.inputs.contact_id }}" | tee replies.txt
+          else
+            python -m mce replies --act | tee replies.txt
+          fi
+          if grep -q '^INTERESTED:' replies.txt; then echo "yes=true" >> "$GITHUB_OUTPUT"; else echo "yes=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Video tools
+        if: steps.scan.outputs.yes == 'true'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          mkdir -p ~/.fonts && cp fonts/*.otf ~/.fonts/ && fc-cache -f
+      - uses: actions/setup-node@v4
+        if: steps.scan.outputs.yes == 'true'
+        with:
+          node-version: "22"
+      - name: Browser for rendering
+        if: steps.scan.outputs.yes == 'true'
+        run: npm install --no-audit --no-fund && npx playwright install --with-deps chromium
+      - uses: actions/cache@v4
+        if: steps.scan.outputs.yes == 'true'
+        with:
+          path: out/tts-cache
+          key: tts-${{ github.run_id }}
+          restore-keys: tts-
+      - name: Build review drafts (nothing is sent)
+        if: steps.scan.outputs.yes == 'true'
+        run: |
+          grep '^INTERESTED:' replies.txt | cut -d: -f2 | while read -r id; do
+            python -m mce draft --contact "$id" || echo "draft failed for $id"
+          done

@@ -46,7 +46,9 @@ def inbound_email(contact_id):
 
 def scan(args):
     if args.contact: cands = [ghl.call("GET", f"/contacts/{args.contact}")["contact"]]
-    else: cands = [c for c in ghl.contacts_with_tag("mce-email-1-sent") if "mce-reply-processed" not in [t.lower() for t in c.get("tags", [])]]
+    else: cands = ghl.contacts_with_tag("mce-email-1-sent")
+    if not (args.contact and not args.act):       # a dry look at one contact may inspect anything; acting skips replies already handled
+        cands = [c for c in cands if "mce-reply-processed" not in [t.lower() for t in c.get("tags", [])]]
     print(f"{len(cands)} contact(s) to check")
     interested = []
     for c in cands:

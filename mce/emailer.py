@@ -47,6 +47,9 @@ def in_send_window(now):
 
 def run(args):
     now = datetime.datetime.now(ZoneInfo("America/New_York"))
+    wm = getattr(args, "wait_minutes", 0)
+    if wm and not in_send_window(now) and now.weekday() < 5 and now.hour == 8 and (60 - now.minute) * 60 - now.second <= wm * 60:
+        import time; secs = (60 - now.minute) * 60 - now.second + 5; print(f"send window opens at 9:00; waiting {secs // 60} min"); time.sleep(secs); now = datetime.datetime.now(ZoneInfo("America/New_York"))
     todo = [c for c in ghl.contacts_with_tag("mce-no-answer") if eligible(c)][: args.limit]
     print(f"{now:%a %H:%M %Z}; send window Mon-Fri 9-11 AM ET: {'OPEN' if in_send_window(now) else 'CLOSED'}; {len(todo)} eligible prospects")
     os.makedirs(args.out, exist_ok=True); sender = os.environ.get("EMAIL_FROM", DEFAULT_FROM)

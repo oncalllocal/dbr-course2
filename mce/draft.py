@@ -46,6 +46,7 @@ def draft(args):
     ghl.add_tags(args.contact, ["mce-video-ready"])
     try: ghl.ensure_opportunity(args.contact, name, "Contacted")
     except Exception as e: print("pipeline note:", str(e)[:100])
+    notify_owner(name, c, url, text)
     print(f"DRAFT READY for {name}\n  video: {url}\n  email: saved as a note + review task (not sent)")
     return url
 
@@ -59,3 +60,19 @@ def send_video(args):
     url = re.search(r"VIDEO: (\\S+)", n["body"]).group(1); html, text = body(url, ghl.field_values(c).get("owner_first"))
     ghl.call("POST", "/conversations/messages", json={"type": "Email", "contactId": args.contact, "subject": SUBJECT, "html": html, "emailFrom": os.environ.get("EMAIL_FROM", emailer.DEFAULT_FROM)})
     ghl.add_tags(args.contact, ["mce-video-sent"]); ghl.add_note(args.contact, f"EMAIL 2 SENT (video)\nVIDEO: {url}"); print(f"sent Email 2 to {name} <{c['email']}>")
+
+
+OWNER_EMAIL = "chris@oncalllocal.com"
+
+def notify_owner(name, contact, url, text):
+    """Email the owner that a draft is ready for review. Goes to the owner's own address only, never to the prospect."""
+    try:
+        owner = next((c for c in ghl.contacts_with_tag("mce-test") if (c.get("email") or "").lower() == OWNER_EMAIL), None)
+        if not owner: print("owner notice skipped: no test contact with the owner's email"); return
+        link = f"https://app.gohighlevel.com/v2/location/{ghl.ghl_location()}/contacts/detail/{contact['id']}"
+        body_html = (f"<p><b>Draft ready for review: {H.escape(name)}</b></p><p>They replied yes. Nothing has been sent to them.</p>"
+                     f'<p>Video: <a href="{H.escape(url)}">{H.escape(url)}</a></p><p>Open their contact (the draft email is in their notes and review task): <a href="{link}">{link}</a></p>'
+                     f"<p>When you approve, tell Claude to send.</p><hr><pre style=\"white-space:pre-wrap\">{H.escape(text)}</pre>")
+        ghl.call("POST", "/conversations/messages", json={"type": "Email", "contactId": owner["id"], "subject": f"[DRAFT READY] {name}", "html": body_html, "emailFrom": os.environ.get("EMAIL_FROM", emailer.DEFAULT_FROM)})
+        print("owner notified by email")
+    except Exception as e: print("owner notice failed:", str(e)[:120])

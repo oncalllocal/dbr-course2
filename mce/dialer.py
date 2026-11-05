@@ -135,6 +135,11 @@ def run(args):
     tz = ZoneInfo(args.tz); now = datetime.datetime.now(tz)
     queue = load_queue(args)[: args.limit]
     open_now = in_window(now, args.days, args.start, args.end)
+    if not open_now and getattr(args, "wait_minutes", 0):          # window opens soon today? wait for it instead of exiting
+        h, m = map(int, args.start.split(":")); opens = now.replace(hour=h, minute=m, second=0, microsecond=0)
+        if now.weekday() <= DAYS[args.days.split("-")[-1][:3]] and 0 < (opens - now).total_seconds() <= args.wait_minutes * 60:
+            print(f"window opens at {args.start}; waiting {(opens - now).total_seconds() / 60:.0f} min"); time.sleep((opens - now).total_seconds() + 5)
+            now = datetime.datetime.now(tz); open_now = in_window(now, args.days, args.start, args.end)
     print(f"{now:%a %H:%M %Z}; window {args.days} {args.start}-{args.end}: {'OPEN' if open_now else 'CLOSED'}; {len(queue)} in queue")
     if not args.live:
         for c in queue: print(f"  [dry-run] would call {c['name']} {c['phone']}")

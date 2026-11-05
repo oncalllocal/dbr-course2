@@ -1,0 +1,1 @@
+{ "name": "mce", "private": true, "description": "Video rendering dependencies for the Missed Call Text Back pipeline", "dependencies": { "playwright": "1.63.0" } }

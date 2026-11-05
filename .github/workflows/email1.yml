@@ -1,0 +1,37 @@
+name: MCTB Email 1
+# Sends Email 1 to prospects who missed our call, weekdays 9:00-11:00 AM Eastern. Scheduled runs need the repo variable MCTB_ACTIONS_LIVE = true.
+on:
+  workflow_dispatch:
+    inputs:
+      live:
+        description: "Send for real? (false = preview only, nothing is sent)"
+        default: "false"
+  schedule:
+    - cron: "50 12 * * 1-5"   # 8:50 AM Eastern in daylight time
+    - cron: "50 13 * * 1-5"   # 8:50 AM Eastern in standard time
+concurrency:
+  group: mctb-email1
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  send:
+    if: github.event_name == 'workflow_dispatch' || vars.MCTB_ACTIONS_LIVE == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GHL_TOKEN: ${{ secrets.GHL_TOKEN }}
+      GHL_LOCATION_ID: ${{ secrets.GHL_LOCATION_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Email 1
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.live }}" = "true" ]; then
+            python -m mce email --live --limit 25 --wait-minutes 20
+          else
+            python -m mce email
+          fi
